@@ -210,23 +210,50 @@ input,select,textarea{font:inherit;color:inherit}
 </style>
 </head>
 <body>
-<div id="gate" style="position:fixed;inset:0;z-index:999;background:#101c33;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0">
-  <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#2a78d6,#1baf7a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:22px;font-family:system-ui">OM</div>
-  <h2 style="color:#fff;font-family:system-ui;margin:18px 0 4px;font-size:20px">OM People</h2>
-  <p style="color:#7f8aa3;font-family:system-ui;font-size:13px;margin-bottom:22px">Offshore Marketers · internal HR dashboard</p>
-  <form id="gateForm" style="display:flex;gap:8px" onsubmit="return gateTry(event)">
-    <input id="gateIn" type="password" placeholder="Team passcode" autocomplete="off" style="background:#182947;border:1px solid #2e3f63;border-radius:8px;padding:11px 14px;color:#fff;font-size:14px;width:200px;outline:none;font-family:system-ui">
-    <button style="background:#2a78d6;color:#fff;border:none;border-radius:8px;padding:11px 18px;font-weight:600;font-size:13.5px;cursor:pointer;font-family:system-ui">Enter →</button>
-  </form>
-  <p id="gateErr" style="color:#e34948;font-family:system-ui;font-size:12px;margin-top:12px;visibility:hidden">Incorrect passcode — try again</p>
+<div id="gate" style="position:fixed;inset:0;z-index:999;background:linear-gradient(145deg,#0d1730,#14264d);display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,'Segoe UI',sans-serif">
+  <div style="width:400px;max-width:92vw;background:#ffffff;border-radius:18px;padding:38px 36px;box-shadow:0 30px 80px rgba(0,0,0,.45)">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#2a78d6,#1baf7a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:19px">OM</div>
+      <div><div style="font-size:19px;font-weight:700;color:#0b0b0b">OM People</div>
+      <div style="font-size:11.5px;color:#898781">Offshore Marketers · HR Platform</div></div>
+    </div>
+    <p style="font-size:13px;color:#52514e;margin:16px 0 20px">Sign in with your Offshore Marketers work email.</p>
+    <form id="gateForm" onsubmit="return gateTry(event)">
+      <label style="display:block;font-size:11.5px;font-weight:600;color:#52514e;margin-bottom:5px">Work email</label>
+      <input id="gateEmail" type="email" placeholder="you@offshoremarketers.com" autocomplete="username" style="width:100%;box-sizing:border-box;background:#f4f5f7;border:1px solid rgba(11,11,11,.12);border-radius:9px;padding:11px 13px;font-size:13.5px;outline:none;margin-bottom:14px">
+      <label style="display:block;font-size:11.5px;font-weight:600;color:#52514e;margin-bottom:5px">Password</label>
+      <input id="gatePass" type="password" placeholder="••••••••" autocomplete="current-password" style="width:100%;box-sizing:border-box;background:#f4f5f7;border:1px solid rgba(11,11,11,.12);border-radius:9px;padding:11px 13px;font-size:13.5px;outline:none;margin-bottom:6px">
+      <p id="gateErr" style="color:#d03b3b;font-size:12px;margin:4px 0 10px;min-height:15px;visibility:hidden">Invalid email or password</p>
+      <button style="width:100%;background:#2a78d6;color:#fff;border:none;border-radius:9px;padding:12px;font-weight:600;font-size:14px;cursor:pointer">Sign in →</button>
+    </form>
+    <p style="font-size:11px;color:#898781;margin:16px 0 0;text-align:center">Trouble signing in? Contact HR · ashima@offshoremarketers.com</p>
+  </div>
 </div>
 <script>
-function gateTry(e){e.preventDefault();var v=document.getElementById("gateIn").value;
- if(btoa(v.toLowerCase())==="b20yMDI2"){document.getElementById("gate").style.display="none";try{sessionStorage.setItem("omg","1")}catch(x){}}
+function omLogin(email){
+ var nm=email.split("@")[0].replace(/[._]/g," ").replace(/\b\w/g,function(c){return c.toUpperCase();});
+ try{sessionStorage.setItem("omUser",email);}catch(x){}
+ document.getElementById("gate").style.display="none";
+ window.addEventListener("DOMContentLoaded",function(){omPersonalize(nm);});
+ if(document.readyState!=="loading")omPersonalize(nm);
+}
+function omPersonalize(nm){
+ try{
+  var first=nm.split(" ")[0];
+  var who=document.querySelector(".who b");if(who)who.textContent=nm;
+  var av=document.querySelector(".top .avatar");if(av)av.textContent=nm.split(" ").map(function(x){return x[0];}).slice(0,2).join("").toUpperCase();
+  var g=document.getElementById("greet");if(g){var h=new Date().getHours();g.textContent=(h<12?"Good morning":h<17?"Good afternoon":"Good evening")+", "+first;}
+ }catch(x){}
+}
+function gateTry(e){e.preventDefault();
+ var em=document.getElementById("gateEmail").value.trim().toLowerCase();
+ var pw=document.getElementById("gatePass").value;
+ var okDomain=/^[a-z0-9._%+-]+@offshoremarketers\.(com|in)$/.test(em);
+ var okPass=btoa(pw.toLowerCase())==="b20yMDI2";
+ if(okDomain&&okPass){omLogin(em);}
  else{document.getElementById("gateErr").style.visibility="visible";}
  return false;}
-try{if(sessionStorage.getItem("omg")==="1")document.getElementById?null:null;}catch(x){}
-window.addEventListener("DOMContentLoaded",function(){try{if(sessionStorage.getItem("omg")==="1")document.getElementById("gate").style.display="none";}catch(x){}});
+(function(){try{var u=sessionStorage.getItem("omUser");if(u){omLogin(u);}}catch(x){}})();
 </script>
 <div class="app">
   <!-- ============ SIDEBAR ============ -->
