@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OM People — Offshore Marketers HR Platform</title>
+<style>
+:root{
+  color-scheme: light;
+  --surface:#fcfcfb; --plane:#f4f5f7; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s7:#4a3aa7;
+  --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b; --goodtext:#006300;
+  --nav:#101c33; --navink:#c8d2e4;
+  --card:#ffffff; --shadow:0 1px 2px rgba(15,23,42,.06),0 4px 14px rgba(15,23,42,.05);
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface:#1a1a19; --plane:#0d0d0d; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s7:#9085e9;
+  --goodtext:#0ca30c;
+  --nav:#10131c; --navink:#aeb6c6;
+  --card:#20201f; --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--plane);color:var(--ink);font-size:14px;overflow:hidden}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+.app{display:flex;height:100vh}
+/* ---------- sidebar ---------- */
+.side{width:212px;background:var(--nav);color:var(--navink);display:flex;flex-direction:column;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:10px;padding:18px 16px 14px}
+.logo .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2a78d6,#1baf7a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px}
+.logo b{color:#fff;font-size:15px;letter-spacing:.2px}
+.logo span{display:block;font-size:10.5px;color:#7f8aa3;margin-top:1px}
+.nav{flex:1;overflow-y:auto;padding:6px 10px 10px}
+.nav::-webkit-scrollbar{width:0}
+.nav .grp{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#66718c;margin:14px 8px 4px}
+.nitem{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:8px;color:var(--navink);font-size:13.5px;text-align:left;margin-bottom:2px;position:relative}
+.nitem svg{width:17px;height:17px;flex-shrink:0;opacity:.85}
+.nitem:hover{background:rgba(255,255,255,.07);color:#fff}
+.nitem.active{background:rgba(58,124,222,.28);color:#fff}
+.nitem .newb{margin-left:auto;font-size:9px;font-weight:700;background:#1baf7a;color:#04160d;padding:2px 6px;border-radius:99px;letter-spacing:.04em}
+.side .foot{padding:12px 16px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#66718c}
+/* ---------- topbar ---------- */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:56px;background:var(--card);border-bottom:1px solid var(--ring);display:flex;align-items:center;gap:12px;padding:0 20px;flex-shrink:0}
+.search{flex:0 1 420px;display:flex;align-items:center;gap:8px;background:var(--plane);border:1px solid var(--ring);border-radius:8px;padding:7px 12px;color:var(--muted);cursor:text}
+.search kbd{margin-left:auto;font-size:10.5px;background:var(--card);border:1px solid var(--ring);border-radius:4px;padding:1px 5px;color:var(--muted)}
+.top .sp{flex:1}
+.iconbtn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink2);position:relative}
+.iconbtn:hover{background:var(--plane)}
+.iconbtn .dot{position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--crit);color:#fff;font-size:7px;display:flex;align-items:center;justify-content:center}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--s7);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.who{line-height:1.15;margin-right:2px}
+.who b{font-size:12.5px;display:block}
+.who span{font-size:10.5px;color:var(--muted)}
+.clockbtn{display:flex;align-items:center;gap:8px;background:var(--s1);color:#fff;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px}
+.clockbtn.out{background:var(--crit)}
+/* ---------- content ---------- */
+.content{flex:1;overflow-y:auto;padding:20px 22px 40px}
+.view{display:none}
+.view.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+.ph{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ph h1{font-size:19px;font-weight:700}
+.ph .sub{color:var(--muted);font-size:12.5px}
+.ph .sp{flex:1}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--ring);margin-bottom:16px;overflow-x:auto}
+.tabs button{padding:9px 14px;font-size:13px;color:var(--ink2);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--s1);border-color:var(--s1);font-weight:600}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g23{grid-template-columns:2fr 1fr}
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2,.g23{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--ring);border-radius:12px;box-shadow:var(--shadow);padding:16px}
+.card h3{font-size:13.5px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.card .hint{font-size:11.5px;color:var(--muted);margin-bottom:10px}
+.kpi .lbl{font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:7px}
+.kpi .val{font-size:26px;font-weight:700;margin-top:6px;letter-spacing:-.02em}
+.kpi .delta{font-size:11.5px;margin-top:3px}
+.delta.up{color:var(--goodtext)} .delta.dn{color:var(--crit)} .delta.nil{color:var(--muted)}
+.kpi .bar{height:3px;border-radius:2px;margin-top:12px;background:var(--grid);overflow:hidden}
+.kpi .bar i{display:block;height:100%;border-radius:2px}
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.03em}
+.badge.new{background:rgba(27,175,122,.15);color:var(--goodtext)}
+.badge.zim{background:rgba(42,120,214,.12);color:var(--s1)}
+.pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
+.pill.ok{background:rgba(12,163,12,.12);color:var(--goodtext)}
+.pill.warn{background:rgba(250,178,25,.16);color:#8a6100}
+:root[data-theme="dark"] .pill.warn{color:#fab219}
+.pill.bad{background:rgba(208,59,59,.12);color:var(--crit)}
+.pill.info{background:rgba(42,120,214,.12);color:var(--s1)}
+.pill.gray{background:var(--plane);color:var(--ink2)}
+/* tables */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--ring);font-weight:600;white-space:nowrap}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--grid);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr{cursor:default}
+.tbl tbody tr.click{cursor:pointer}
+.tbl tbody tr.click:hover{background:var(--plane)}
+.emp{display:flex;align-items:center;gap:9px}
+.emp .av{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.emp b{font-size:13px;font-weight:600;display:block}
+.emp span{font-size:11px;color:var(--muted)}
+.btn{background:var(--s1);color:#fff;border-radius:8px;padding:8px 14px;font-weight:600;font-size:12.5px;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--ring)}
+.btn.ghost:hover{background:var(--plane);filter:none}
+.btn.sm{padding:5px 10px;font-size:11.5px;border-radius:6px}
+.btn.good{background:var(--good)} .btn.bad{background:var(--crit)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filters select,.filters input{background:var(--card);border:1px solid var(--ring);border-radius:8px;padding:7px 10px;font-size:12.5px;color:var(--ink)}
+.list .li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--grid)}
+.list .li:last-child{border-bottom:none}
+.progress{height:6px;background:var(--grid);border-radius:3px;overflow:hidden;flex:1}
+.progress i{display:block;height:100%;border-radius:3px;background:var(--s1)}
+/* chart bits */
+.chart{position:relative}
+.tip{position:fixed;z-index:99;background:var(--ink);color:var(--card);padding:6px 9px;border-radius:6px;font-size:11.5px;pointer-events:none;display:none;line-height:1.35;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2);margin-top:8px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px}
+/* drawer / modal */
+.overlay{position:fixed;inset:0;background:rgba(10,14,25,.45);z-index:50;display:none}
+.overlay.on{display:block}
+.drawer{position:fixed;top:0;right:-460px;width:440px;max-width:92vw;height:100vh;background:var(--card);z-index:60;box-shadow:-8px 0 30px rgba(0,0,0,.18);transition:right .22s ease;display:flex;flex-direction:column}
+.drawer.on{right:0}
+.drawer .dh{padding:16px 20px;border-bottom:1px solid var(--ring);display:flex;align-items:center;gap:10px}
+.drawer .db{flex:1;overflow-y:auto;padding:18px 20px}
+.modal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.on{display:flex}
+.modal .mbox{background:var(--card);border-radius:14px;width:520px;max-width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.mbox .mh{padding:16px 20px;border-bottom:1px solid var(--ring);display:flex;align-items:center}
+.mbox .mh b{font-size:15px}
+.mbox .mb{padding:18px 20px}
+.mbox .mf{padding:14px 20px;border-top:1px solid var(--ring);display:flex;gap:8px;justify-content:flex-end}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:11.5px;font-weight:600;color:var(--ink2);margin-bottom:5px}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--plane);border:1px solid var(--ring);border-radius:8px;padding:9px 11px;font-size:13px}
+.fld textarea{min-height:70px;resize:vertical}
+.x{margin-left:auto;width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px}
+.x:hover{background:var(--plane);color:var(--ink)}
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--card);padding:11px 18px;border-radius:10px;font-size:13px;z-index:99;transition:transform .25s ease;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:90vw}
+.toast.on{transform:translateX(-50%) translateY(0)}
+/* stepper */
+.steps{display:flex;gap:0;margin-bottom:18px}
+.step{flex:1;display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:2px solid var(--grid);color:var(--muted);font-size:12.5px;font-weight:600}
+.step .n{width:24px;height:24px;border-radius:50%;background:var(--grid);color:var(--ink2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.step.on{border-color:var(--s1);color:var(--s1)}
+.step.on .n{background:var(--s1);color:#fff}
+.step.done{border-color:var(--good);color:var(--goodtext)}
+.step.done .n{background:var(--good);color:#fff}
+/* org chart */
+.org{display:flex;flex-direction:column;align-items:center;gap:0;overflow-x:auto;padding:10px}
+.orgrow{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.orgcard{background:var(--card);border:1px solid var(--ring);border-radius:10px;padding:10px 14px;text-align:center;min-width:130px;box-shadow:var(--shadow)}
+.orgcard b{font-size:12.5px;display:block}
+.orgcard span{font-size:10.5px;color:var(--muted)}
+.orgline{width:2px;height:18px;background:var(--axis)}
+/* mood */
+.moods{display:flex;gap:10px;justify-content:space-between}
+.mood{flex:1;text-align:center;padding:10px 4px;border-radius:10px;border:1px solid var(--ring);font-size:22px}
+.mood:hover{background:var(--plane)}
+.mood.sel{background:rgba(42,120,214,.12);border-color:var(--s1)}
+.mood small{display:block;font-size:10px;color:var(--muted);margin-top:4px}
+/* heat */
+.heat{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.heat i{aspect-ratio:1;border-radius:3px;display:block}
+/* util board */
+.utilrow{display:grid;grid-template-columns:190px 1fr 90px;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--grid)}
+.utilrow:last-child{border-bottom:none}
+.utilbar{height:16px;border-radius:5px;background:var(--grid);overflow:hidden;display:flex}
+.utilbar i{height:100%;display:block;border-right:2px solid var(--card)}
+/* AI */
+.ai{display:flex;flex-direction:column;height:420px}
+.ai .log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px 10px}
+.msg{max-width:85%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.45}
+.msg.user{align-self:flex-end;background:var(--s1);color:#fff;border-bottom-right-radius:3px}
+.msg.bot{align-self:flex-start;background:var(--plane);border:1px solid var(--ring);border-bottom-left-radius:3px;white-space:pre-line}
+.ai .inrow{display:flex;gap:8px}
+.ai .inrow input{flex:1;background:var(--plane);border:1px solid var(--ring);border-radius:8px;padding:10px 12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{font-size:11px;border:1px solid var(--ring);border-radius:99px;padding:4px 10px;color:var(--ink2)}
+.chip:hover{background:var(--plane)}
+/* cmdk */
+.cmdk{position:fixed;inset:0;z-index:80;display:none;align-items:flex-start;justify-content:center;padding-top:12vh;background:rgba(10,14,25,.45)}
+.cmdk.on{display:flex}
+.cmdk .box{background:var(--card);border-radius:14px;width:560px;max-width:92vw;box-shadow:0 24px 70px rgba(0,0,0,.35);overflow:hidden}
+.cmdk input{width:100%;border:none;background:none;padding:16px 18px;font-size:15px;outline:none;border-bottom:1px solid var(--ring)}
+.cmdk .res{max-height:320px;overflow-y:auto;padding:6px}
+.cmdk .r{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13.5px;cursor:pointer}
+.cmdk .r:hover,.cmdk .r.sel{background:var(--plane)}
+.cmdk .r span{color:var(--muted);font-size:11px;margin-left:auto}
+.report{border:1px solid var(--ring);border-radius:10px;padding:14px;background:var(--card)}
+.report b{font-size:13px}
+.report p{font-size:11.5px;color:var(--muted);margin:6px 0 10px;line-height:1.4}
+.notice{background:rgba(42,120,214,.08);border:1px solid rgba(42,120,214,.25);border-radius:10px;padding:10px 14px;font-size:12.5px;margin-bottom:14px;display:flex;gap:8px;align-items:flex-start}
+.mt{margin-top:14px}
+.hero{font-size:30px;font-weight:700;letter-spacing:-.02em}
+.subgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--plane);border-radius:10px;padding:10px 12px}
+.stat b{font-size:17px;display:block}
+.stat span{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="gate" style="position:fixed;inset:0;z-index:999;background:#101c33;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0">
+  <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#2a78d6,#1baf7a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:22px;font-family:system-ui">OM</div>
+  <h2 style="color:#fff;font-family:system-ui;margin:18px 0 4px;font-size:20px">OM People</h2>
+  <p style="color:#7f8aa3;font-family:system-ui;font-size:13px;margin-bottom:22px">Offshore Marketers · internal HR dashboard</p>
+  <form id="gateForm" style="display:flex;gap:8px" onsubmit="return gateTry(event)">
+    <input id="gateIn" type="password" placeholder="Team passcode" autocomplete="off" style="background:#182947;border:1px solid #2e3f63;border-radius:8px;padding:11px 14px;color:#fff;font-size:14px;width:200px;outline:none;font-family:system-ui">
+    <button style="background:#2a78d6;color:#fff;border:none;border-radius:8px;padding:11px 18px;font-weight:600;font-size:13.5px;cursor:pointer;font-family:system-ui">Enter →</button>
+  </form>
+  <p id="gateErr" style="color:#e34948;font-family:system-ui;font-size:12px;margin-top:12px;visibility:hidden">Incorrect passcode — try again</p>
+</div>
+<script>
+function gateTry(e){e.preventDefault();var v=document.getElementById("gateIn").value;
+ if(btoa(v.toLowerCase())==="b20yMDI2"){document.getElementById("gate").style.display="none";try{sessionStorage.setItem("omg","1")}catch(x){}}
+ else{document.getElementById("gateErr").style.visibility="visible";}
+ return false;}
+try{if(sessionStorage.getItem("omg")==="1")document.getElementById?null:null;}catch(x){}
+window.addEventListener("DOMContentLoaded",function(){try{if(sessionStorage.getItem("omg")==="1")document.getElementById("gate").style.display="none";}catch(x){}});
+</script>
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="logo">
+      <div class="mark">OM</div>
+      <div><b>OM People</b><span>Offshore Marketers HR</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="grp">Workspace</div>
+      <button class="nitem active" data-view="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
+      <button class="nitem" data-view="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.9A2 2 0 0016.7 4H7.3a2 2 0 00-1.8 1.1z"/></svg>Inbox <span class="pill bad" id="inboxCount" style="margin-left:auto">6</span></button>
+      <div class="grp">Modules</div>
+      <button class="nitem" data-view="corehr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Core HR</button>
+      <button class="nitem" data-view="att"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Attendance &amp; Leave</button>
+      <button class="nitem" data-view="pay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payroll &amp; Expenses</button>
+      <button class="nitem" data-view="perf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Performance</button>
+      <button class="nitem" data-view="engage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>Engage</button>
+      <button class="nitem" data-view="wf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Workflows</button>
+      <button class="nitem" data-view="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Reports</button>
+      <div class="grp">OM Exclusive</div>
+      <button class="nitem" data-view="agency"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>Agency Ops<span class="newb">NEW</span></button>
+      <button class="nitem" data-view="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4M8 2h8M9 12h.01M15 12h.01M9 16h6"/></svg>HR Copilot<span class="newb">NEW</span></button>
+    </nav>
+    <div class="foot">Internal prototype v0.1<br>Offshore Marketers · Mohali</div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="top">
+      <div class="search" onclick="openCmdk()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Search people, actions, reports…
+        <kbd>Ctrl K</kbd>
+      </div>
+      <div class="sp"></div>
+      <button class="clockbtn" id="clockBtn" onclick="toggleClock()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span id="clockLbl">Clock In</span><span id="clockTimer"></span>
+      </button>
+      <button class="iconbtn" onclick="toggleTheme()" title="Dark / light mode">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <button class="iconbtn" onclick="go('inbox')" title="Notifications">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="dot"></span>
+      </button>
+      <div class="who"><b>Ashima Parihar</b><span>HR Admin</span></div>
+      <div class="avatar">AP</div>
+    </header>
+
+    <div class="content" id="content">
+
+      <!-- ================= DASHBOARD ================= -->
+      <section class="view on" id="v-dash">
+        <div class="ph">
+          <div><h1 id="greet">Good morning, Ashima</h1><div class="sub" id="today"></div></div>
+          <div class="sp"></div>
+          <button class="btn ghost" onclick="openModal('m-announce')">+ Announcement</button>
+          <button class="btn" onclick="openModal('m-addemp')">+ Add Employee</button>
+        </div>
+        <div class="grid g4">
+          <div class="card kpi"><div class="lbl">Active employees</div><div class="val" id="kpiHead">37</div><div class="delta up">▲ 3.8% since last month</div><div class="bar"><i style="width:76%;background:var(--s1)"></i></div></div>
+          <div class="card kpi"><div class="lbl">Present today</div><div class="val"><span id="kpiPresent">29</span><span style="font-size:14px;color:var(--muted)"> / 37</span></div><div class="delta nil" id="kpiAbs">8 absent · 0 on leave</div><div class="bar"><i style="width:78%;background:var(--s3)"></i></div></div>
+          <div class="card kpi"><div class="lbl">Pending approvals</div><div class="val" id="kpiPending">6</div><div class="delta dn">2 overdue &gt; 48h</div><div class="bar"><i style="width:40%;background:var(--s4)"></i></div></div>
+          <div class="card kpi"><div class="lbl">Payroll — July</div><div class="val">₹14.2L</div><div class="delta nil">37 pending for payroll run</div><div class="bar"><i style="width:62%;background:var(--s7)"></i></div></div>
+        </div>
+        <div class="grid g23 mt">
+          <div class="card chart"><h3>Headcount trend</h3><div class="hint">Total, new joiners &amp; offboarded — last 3 months</div><div id="ch-head"></div></div>
+          <div class="card chart"><h3>Headcount by department</h3><div class="hint">37 active employees</div><div id="ch-dept"></div></div>
+        </div>
+        <div class="grid g3 mt">
+          <div class="card chart"><h3>Attendance today</h3><div class="hint">Live org attendance</div><div id="ch-attToday"></div></div>
+          <div class="card"><h3>Manager : Employee ratio</h3><div class="hint">Org structure health</div>
+            <div class="hero">7 : 30</div>
+            <div class="subgrid mt"><div class="stat"><b>7</b><span>Managers (19%)</span></div><div class="stat"><b>30</b><span>Employees (81%)</span></div></div>
+            <div class="notice mt" style="margin-bottom:0">💡 Span of control in Digital Marketing is 1:9 — consider a second team lead.</div>
+          </div>
+          <div class="card"><h3>Action needed</h3><div class="hint">Auto-collected from all modules</div>
+            <div class="list" id="actionList"></div>
+          </div>
+        </div>
+        <div class="grid g3 mt">
+          <div class="card chart"><h3>Team mood — last 30 days <span class="badge zim">replicated</span></h3><div class="hint">Satisfaction survey responses</div><div id="ch-mood"></div></div>
+          <div class="card"><h3>Probation &amp; joining</h3><div class="hint">Next 30 days</div>
+            <div class="list">
+              <div class="li"><div class="emp"><div class="av" style="background:var(--s1)">AT</div><div><b>Apurva Thakur</b><span>Probation confirmation · 09 Aug</span></div></div><button class="btn sm ghost" onclick="go('inbox')">Review</button></div>
+              <div class="li"><div class="emp"><div class="av" style="background:var(--s3)">RJ</div><div><b>Rhea Joshi</b><span>Joining · 03 Aug · Content Writer</span></div></div><span class="pill info">Offer signed</span></div>
+              <div class="li"><div class="emp"><div class="av" style="background:var(--s5)">ND</div><div><b>Nitin Dong</b><span>Incomplete hours this week (1 day)</span></div></div><span class="pill warn">Follow up</span></div>
+            </div>
+          </div>
+          <div class="card"><h3>Celebrations 🎉 <span class="badge new">OM extra</span></h3><div class="hint">Birthdays &amp; work anniversaries</div>
+            <div class="list">
+              <div class="li"><div class="emp"><div class="av" style="background:var(--s2)">KC</div><div><b>Kritika Chauhan</b><span>Birthday · 01 Aug</span></div></div><button class="btn sm ghost" onclick="toast('Wish sent on the Engage feed 🎂')">Send wish</button></div>
+              <div class="li"><div class="emp"><div class="av" style="background:var(--s7)">SB</div><div><b>Somnath Bk</b><span>1 year at OM · 12 Aug</span></div></div><button class="btn sm ghost" onclick="toast('Anniversary post scheduled 🎉')">Celebrate</button></div>
+              <div class="li"><div class="emp"><div class="av" style="background:var(--s4)">MB</div><div><b>Mercy Bhatti</b><span>Birthday · 19 Aug</span></div></div><button class="btn sm ghost" onclick="toast('Wish sent on the Engage feed 🎂')">Send wish</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= INBOX ================= -->
+      <section class="view" id="v-inbox">
+        <div class="ph"><div><h1>Inbox — approvals &amp; requests</h1><div class="sub">Everything waiting on you, across all modules</div></div></div>
+        <div class="card" style="padding:6px 16px">
+          <table class="tbl" id="inboxTbl"><thead><tr><th>Request</th><th>Employee</th><th>Type</th><th>Details</th><th>Waiting</th><th style="text-align:right">Action</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- ================= CORE HR ================= -->
+      <section class="view" id="v-corehr">
+        <div class="ph"><div><h1>Core HR</h1><div class="sub">Employee master · org chart · documents · policies</div></div>
+          <div class="sp"></div><button class="btn" onclick="openModal('m-addemp')">+ Add Employee</button></div>
+        <div class="tabs" data-tabs="corehr">
+          <button class="on" data-tab="emp">Employee Master</button>
+          <button data-tab="org">Organization Chart</button>
+          <button data-tab="docs">Documents</button>
+          <button data-tab="policy">Policies</button>
+          <button data-tab="roles">Roles &amp; Permissions</button>
+        </div>
+        <div class="tabpanes" id="tp-corehr">
+          <div class="pane on" data-pane="emp">
+            <div class="filters">
+              <input type="text" id="empSearch" placeholder="Search name, email, ID…" style="width:230px" oninput="renderEmpTable()">
+              <select id="empDept" onchange="renderEmpTable()"><option value="">All departments</option></select>
+              <select id="empStatus" onchange="renderEmpTable()"><option value="">All statuses</option><option>Active</option><option>Probation</option><option>Notice Period</option></select>
+              <div class="sp" style="flex:1"></div>
+              <button class="btn ghost sm" onclick="exportCSV('employees')">⬇ Export CSV</button>
+            </div>
+            <div class="card" style="padding:6px 16px">
+              <table class="tbl"><thead><tr><th>Name</th><th>Department</th><th>Designation</th><th>Location</th><th>Status</th><th>Type</th><th>Joined</th></tr></thead><tbody id="empRows"></tbody></table>
+            </div>
+          </div>
+          <div class="pane" data-pane="org">
+            <div class="card"><div class="org" id="orgChart"></div></div>
+          </div>
+          <div class="pane" data-pane="docs">
+            <div class="grid g3">
+              <div class="card kpi"><div class="lbl">Docs on file</div><div class="val">312</div><div class="delta nil">Across 37 employees</div></div>
+              <div class="card kpi"><div class="lbl">Expiring in 90 days</div><div class="val">3</div><div class="delta dn">2 ID proofs, 1 contract</div></div>
+              <div class="card kpi"><div class="lbl">Missing mandatory</div><div class="val">5</div><div class="delta dn">PAN ×2 · Address ×3</div></div>
+            </div>
+            <div class="card mt" style="padding:6px 16px">
+              <table class="tbl"><thead><tr><th>Employee</th><th>Document</th><th>Status</th><th>Expiry</th><th style="text-align:right">Action</th></tr></thead>
+              <tbody>
+                <tr><td>Jaskirat Singh</td><td>Employment contract</td><td><span class="pill warn">Expiring</span></td><td>28 Sep 2026</td><td style="text-align:right"><button class="btn sm ghost" onclick="toast('Renewal reminder sent to Jaskirat')">Remind</button></td></tr>
+                <tr><td>Jatin Karla</td><td>PAN card</td><td><span class="pill bad">Missing</span></td><td>—</td><td style="text-align:right"><button class="btn sm ghost" onclick="toast('Upload request sent to Jatin')">Request</button></td></tr>
+                <tr><td>Simranjeet Kaur</td><td>Address proof</td><td><span class="pill bad">Missing</span></td><td>—</td><td style="text-align:right"><button class="btn sm ghost" onclick="toast('Upload request sent to Simranjeet')">Request</button></td></tr>
+                <tr><td>Mercy Bhatti</td><td>Intern agreement</td><td><span class="pill ok">Valid</span></td><td>01 Feb 2027</td><td style="text-align:right"><button class="btn sm ghost" onclick="toast('Opening document preview…')">View</button></td></tr>
+              </tbody></table>
+            </div>
+          </div>
+          <div class="pane" data-pane="policy">
+            <div class="grid g3" id="policyCards"></div>
+          </div>
+          <div class="pane" data-pane="roles">
+            <div class="card" style="padding:6px 16px">
+              <table class="tbl"><thead><tr><th>Role</th><th>Members</th><th>Core HR</th><th>Payroll</th><th>Reports</th><th>Workflows</th></tr></thead>
+              <tbody>
+                <tr><td><b>Super Admin</b></td><td>Shiva</td><td><span class="pill ok">Full</span></td><td><span class="pill ok">Full</span></td><td><span class="pill ok">Full</span></td><td><span class="pill ok">Full</span></td></tr>
+                <tr><td><b>HR Admin</b></td><td>Ashima Parihar</td><td><span class="pill ok">Full</span></td><td><span class="pill info">Run only</span></td><td><span class="pill ok">Full</span></td><td><span class="pill ok">Full</span></td></tr>
+                <tr><td><b>Manager</b></td><td>7 managers</td><td><span class="pill info">Team only</span></td><td><span class="pill gray">None</span></td><td><span class="pill info">Team only</span></td><td><span class="pill info">Approve</span></td></tr>
+                <tr><td><b>Employee</b></td><td>All 37</td><td><span class="pill info">Self</span></td><td><span class="pill info">Payslips</span></td><td><span class="pill gray">None</span></td><td><span class="pill info">Raise</span></td></tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ATTENDANCE ================= -->
+      <section class="view" id="v-att">
+        <div class="ph"><div><h1>Attendance &amp; Leave</h1><div class="sub">Live tracking · leave management · holidays · shifts</div></div>
+          <div class="sp"></div><button class="btn" onclick="openModal('m-leave')">+ Apply Leave</button></div>
+        <div class="tabs" data-tabs="att">
+          <button class="on" data-tab="attd">Dashboard</button>
+          <button data-tab="leave">Leave</button>
+          <button data-tab="hol">Holidays</button>
+          <button data-tab="shift">Shifts &amp; Roster</button>
+        </div>
+        <div class="tabpanes" id="tp-att">
+          <div class="pane on" data-pane="attd">
+            <div class="grid g4">
+              <div class="card kpi"><div class="lbl">Present</div><div class="val" style="color:var(--s1)" id="attPresent">29</div><div class="delta nil">of 37 scheduled</div></div>
+              <div class="card kpi"><div class="lbl">Absent</div><div class="val" style="color:var(--s2)">7</div><div class="delta nil">2 uninformed</div></div>
+              <div class="card kpi"><div class="lbl">Week off / leave</div><div class="val">1</div><div class="delta nil">Roster-based</div></div>
+              <div class="card kpi"><div class="lbl">Avg working hours</div><div class="val">9h 12m</div><div class="delta up">▲ 4% vs last week</div></div>
+            </div>
+            <div class="grid g2 mt">
+              <div class="card chart"><h3>Working hours distribution</h3><div class="hint">Employees by average daily hours — July</div><div id="ch-hours"></div></div>
+              <div class="card chart"><h3>Arrival time — today</h3><div class="hint">Clock-ins by half-hour slot</div><div id="ch-arrival"></div></div>
+            </div>
+            <div class="card mt"><h3>Incomplete working hours — this week</h3><div class="hint">Below 9h scheduled time</div>
+              <div class="list">
+                <div class="li"><div class="emp"><div class="av" style="background:var(--s4)">ND</div><div><b>Nitin Dong</b><span>Mon 5h 40m · missed punch-out</span></div></div><button class="btn sm ghost" onclick="toast('Regularisation request sent to Nitin')">Ask to regularise</button></div>
+                <div class="li"><div class="emp"><div class="av" style="background:var(--s5)">JK</div><div><b>Jatin Karla</b><span>Tue 7h 05m · late arrival</span></div></div><button class="btn sm ghost" onclick="toast('Note added to attendance log')">Add note</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="pane" data-pane="leave">
+            <div class="grid g4">
+              <div class="card kpi"><div class="lbl">My casual leave</div><div class="val">6.5</div><div class="delta nil">of 12 remaining</div><div class="bar"><i style="width:54%;background:var(--s1)"></i></div></div>
+              <div class="card kpi"><div class="lbl">My sick leave</div><div class="val">5</div><div class="delta nil">of 6 remaining</div><div class="bar"><i style="width:83%;background:var(--s3)"></i></div></div>
+              <div class="card kpi"><div class="lbl">Comp-offs</div><div class="val">2</div><div class="delta nil">1 expiring 15 Aug</div><div class="bar"><i style="width:66%;background:var(--s4)"></i></div></div>
+              <div class="card kpi"><div class="lbl">Team on leave today</div><div class="val">0</div><div class="delta nil">3 upcoming this week</div></div>
+            </div>
+            <div class="grid g23 mt">
+              <div class="card" style="padding:6px 16px">
+                <table class="tbl" id="leaveTbl"><thead><tr><th>Employee</th><th>Type</th><th>Dates</th><th>Days</th><th>Status</th></tr></thead><tbody></tbody></table>
+              </div>
+              <div class="card"><h3>Leave rules</h3><div class="hint">Assigned policies</div>
+                <div class="list">
+                  <div class="li"><div><b style="font-size:13px">General</b><br><span style="font-size:11px;color:var(--muted)">29 employees · 12 CL + 6 SL + 15 EL</span></div><span class="pill ok" style="margin-left:auto">Active</span></div>
+                  <div class="li"><div><b style="font-size:13px">Interns</b><br><span style="font-size:11px;color:var(--muted)">8 employees · 1 leave / month</span></div><span class="pill ok" style="margin-left:auto">Active</span></div>
+                  <div class="li"><div><b style="font-size:13px">Sandwich rule</b><br><span style="font-size:11px;color:var(--muted)">Weekend between leaves counts</span></div><span class="pill info" style="margin-left:auto">On</span></div>
+                </div>
+                <button class="btn ghost sm mt" onclick="toast('Leave encashment cycle FY26-27 initiated')">Initiate leave encashment</button>
+              </div>
+            </div>
+          </div>
+          <div class="pane" data-pane="hol">
+            <div class="card" style="padding:6px 16px">
+              <table class="tbl"><thead><tr><th>Holiday</th><th>Date</th><th>Day</th><th>Type</th></tr></thead>
+              <tbody id="holRows"></tbody></table>
+            </div>
+          </div>
+          <div class="pane" data-pane="shift">
+            <div class="grid g3">
+              <div class="card"><h3>General shift</h3><div class="hint">10:00 — 19:00 · Mon–Fri</div><div class="pill info">29 employees</div><p style="font-size:12px;color:var(--muted);margin-top:10px">Grace 15 min · half-day below 4.5h · auto week-off Sat/Sun</p></div>
+              <div class="card"><h3>US client shift <span class="badge new">OM extra</span></h3><div class="hint">15:00 — 00:00 · Mon–Fri</div><div class="pill info">6 employees</div><p style="font-size:12px;color:var(--muted);margin-top:10px">Night allowance ₹350/day · cab reimbursement enabled</p></div>
+              <div class="card"><h3>Intern shift</h3><div class="hint">09:30 — 17:30 · Mon–Sat alt</div><div class="pill info">8 employees</div><p style="font-size:12px;color:var(--muted);margin-top:10px">Alternate Saturdays · mentor sign-off on timesheet</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ================= PAYROLL ================= -->
+      <section class="view" id="v-pay">
+        <div class="ph"><div><h1>Payroll &amp; Expenses</h1><div class="sub">July 2026 cycle · compliance · reimbursements</div></div>
+          <div class="sp"></div><button class="btn" onclick="go('pay');switchTab('pay','run')">Run Payroll →</button></div>
+        <div class="notice">⚖️ <div><b>Compliance:</b> New ESI wage configuration is available per updated Labour Law. PT slabs were revised — review before running July payroll.</div></div>
+        <div class="tabs" data-tabs="pay">
+          <button class="on" data-tab="payd">Overview</button>
+          <button data-tab="run">Run Payroll</button>
+          <button data-tab="slips">Payslips</button>
+          <button data-tab="exp">Expenses &amp; Claims</button>
+        </div>
+        <div class="tabpanes" id="tp-pay">
+          <div class="pane on" data-pane="payd">
+            <div class="grid g4">
+              <div class="card kpi"><div class="lbl">Pending for payroll</div><div class="val">37</div><div class="delta nil">July 2026</div></div>
+              <div class="card kpi"><div class="lbl">Pending FNF</div><div class="val">1</div><div class="delta nil">Full &amp; final settlement</div></div>
+              <div class="card kpi"><div class="lbl">Gross payout (est.)</div><div class="val">₹14.2L</div><div class="delta up">▲ 2.1% vs June</div></div>
+              <div class="card kpi"><div class="lbl">Reimbursements due</div><div class="val" id="kpiReimb">₹18,450</div><div class="delta nil"><span id="kpiReimbN">4</span> claims pending</div></div>
+            </div>
+            <div class="grid g23 mt">
+              <div class="card chart"><h3>Cost to company</h3><div class="hint">Monthly gross vs deductions — last 6 months (₹)</div><div id="ch-ctc"></div></div>
+              <div class="card"><h3>Salary structure health</h3><div class="hint">Checks before payroll run</div>
+                <div class="list">
+                  <div class="li"><span>CTC approvals pending</span><span class="pill ok" style="margin-left:auto">0</span></div>
+                  <div class="li"><span>Salary on hold</span><span class="pill ok" style="margin-left:auto">0</span></div>
+                  <div class="li"><span>Non-compliant min. wages</span><span class="pill ok" style="margin-left:auto">0</span></div>
+                  <div class="li"><span>Investment declarations open</span><span class="pill warn" style="margin-left:auto">11</span></div>
+                  <div class="li"><span>Active loans / advances</span><span class="pill info" style="margin-left:auto">2 · ₹64,000</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pane" data-pane="run">
+            <div class="card">
+              <div class="steps" id="paySteps">
+                <div class="step on"><span class="n">1</span>Leave &amp; Attendance</div>
+                <div class="step"><span class="n">2</span>Process Arrears</div>
+                <div class="step"><span class="n">3</span>Review &amp; Run</div>
+                <div class="step"><span class="n">4</span>Publish Payslips</div>
+              </div>
+              <div id="payStepBody"></div>
+              <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+                <button class="btn ghost" id="payBack" onclick="payStep(-1)" style="display:none">← Back</button>
+                <button class="btn" id="payNext" onclick="payStep(1)">Lock attendance &amp; proceed →</button>
+              </div>
+            </div>
+          </div>
+          <div class="pane" data-pane="slips">
+            <div class="filters"><select><option>July 2026</option><option>June 2026</option><option>May 2026</option></select>
+              <div class="sp" style="flex:1"></div><button class="btn ghost sm" onclick="exportCSV('payroll')">⬇ Payroll register CSV</button></div>
+            <div class="card" style="padding:6px 16px">
+              <table class="tbl"><thead><tr><th>Employee</th><th>Gross</th><th>Deductions</th><th>Net pay</th><th>Status</th><th style="text-align:right"></th></tr></thead><tbody id="slipRows"></tbody></table>
+            </div>
+          </div>
+          <div class="pane" data-pane="exp">
+            <div class="card" style="padding:6px 16px">
+              <table class="tbl" id="expTbl"><thead><tr><th>Employee</th><th>Category</th><th>Description</th><th>Amount</th><th>Status</th><th style="text-align:right">Action</th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PERFORMANCE ================= -->
+      <section class="view" id="v-perf">
+        <div class="ph"><div><h1>Performance <span class="badge new">OM upgrade — goals &amp; OKRs built-in</span></h1><div class="sub">Quarterly OKRs · reviews · one-to-ones · PIP</div></div>
+          <div class="sp"></div><button class="btn" onclick="toast('Q3 review cycle scheduled — invites go out 01 Sep')">Launch Q3 reviews</button></div>
+        <div class="grid g4">
+          <div class="card kpi"><div class="lbl">Company OKR progress</div><div class="val">68%</div><div class="delta up">Q3 FY26 · on track</div><div class="bar"><i style="width:68%;background:var(--s3)"></i></div></div>
+          <div class="card kpi"><div class="lbl">Goals set</div><div class="val">31<span style="font-size:14px;color:var(--muted)"> / 37</span></div><div class="delta dn">6 employees without goals</div></div>
+          <div class="card kpi"><div class="lbl">1:1s this month</div><div class="val">18</div><div class="delta nil">9 scheduled next week</div></div>
+          <div class="card kpi"><div class="lbl">On PIP</div><div class="val">0</div><div class="delta nil">2 watch-list</div></div>
+        </div>
+        <div class="grid g23 mt">
+          <div class="card"><h3>Company OKRs — Q3 FY26</h3><div class="hint">Progress rolls up from team key results</div>
+            <div class="list" id="okrList"></div>
+          </div>
+          <div class="card"><h3>Review cycle</h3><div class="hint">Q2 wrap-up status</div>
+            <div class="list">
+              <div class="li"><span>Self reviews</span><div class="progress"><i style="width:100%"></i></div><b style="font-size:12px">37/37</b></div>
+              <div class="li"><span>Manager reviews</span><div class="progress"><i style="width:81%"></i></div><b style="font-size:12px">30/37</b></div>
+              <div class="li"><span>Calibration</span><div class="progress"><i style="width:40%;background:var(--s4)"></i></div><b style="font-size:12px">3/7 teams</b></div>
+              <div class="li"><span>Letters shared</span><div class="progress"><i style="width:0"></i></div><b style="font-size:12px">0/37</b></div>
+            </div>
+            <button class="btn ghost sm mt" onclick="toast('Reminder sent to 7 managers with pending reviews')">Nudge pending managers</button>
+          </div>
+        </div>
+        <div class="grid g2 mt">
+          <div class="card chart"><h3>Rating distribution — Q2</h3><div class="hint">37 employees, 5-point scale</div><div id="ch-rating"></div></div>
+          <div class="card"><h3>Watch-list <span class="badge new">OM extra</span></h3><div class="hint">Early signals — not visible to employees</div>
+            <div class="list">
+              <div class="li"><div class="emp"><div class="av" style="background:var(--s4)">JS</div><div><b>Jaskirat Singh</b><span>Goal progress 22% · 2 missed 1:1s</span></div></div><button class="btn sm ghost" onclick="toast('1:1 scheduled with mentor for Thursday')">Schedule 1:1</button></div>
+              <div class="li"><div class="emp"><div class="av" style="background:var(--s2)">VK</div><div><b>Vikram Kohli</b><span>Utilization 41% · low kudos activity</span></div></div><button class="btn sm ghost" onclick="toast('Added to coaching plan draft')">Coaching plan</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ENGAGE ================= -->
+      <section class="view" id="v-engage">
+        <div class="ph"><div><h1>Engage</h1><div class="sub">Announcements · mood · kudos · surveys</div></div>
+          <div class="sp"></div><button class="btn" onclick="openModal('m-announce')">+ Announcement</button></div>
+        <div class="grid g23">
+          <div>
+            <div class="card"><h3>Company feed</h3><div class="hint">Announcements &amp; recognition</div>
+              <div class="list" id="feedList"></div>
+            </div>
+            <div class="card mt"><h3>Give kudos 🙌 <span class="badge new">OM extra</span></h3><div class="hint">Public recognition, tied to company values</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <select id="kudosWho" style="flex:1;min-width:150px;background:var(--plane);border:1px solid var(--ring);border-radius:8px;padding:9px 11px"></select>
+                <select id="kudosVal" style="flex:1;min-width:150px;background:var(--plane);border:1px solid var(--ring);border-radius:8px;padding:9px 11px">
+                  <option>🚀 Ships fast</option><option>🎯 Client obsessed</option><option>🤝 Team player</option><option>💡 Creative spark</option></select>
+                <button class="btn" onclick="giveKudos()">Send</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card"><h3>How are you feeling today?</h3><div class="hint">Anonymous — feeds the team mood chart</div>
+              <div class="moods" id="moodPick">
+                <button class="mood" data-m="Happy">😄<small>Happy</small></button>
+                <button class="mood" data-m="Calm">😌<small>Calm</small></button>
+                <button class="mood" data-m="Sleepy">😴<small>Sleepy</small></button>
+                <button class="mood" data-m="Dull">😑<small>Dull</small></button>
+                <button class="mood" data-m="Sad">😞<small>Sad</small></button>
+              </div>
+            </div>
+            <div class="card mt"><h3>eNPS <span class="badge new">OM extra</span></h3><div class="hint">Quarterly pulse — "Would you recommend OM as a place to work?"</div>
+              <div class="hero" style="color:var(--goodtext)">+42</div>
+              <div class="legend"><span><i style="background:var(--s3)"></i>Promoters 58%</span><span><i style="background:var(--s4)"></i>Passives 26%</span><span><i style="background:var(--s2)"></i>Detractors 16%</span></div>
+              <button class="btn ghost sm mt" onclick="toast('Q3 eNPS pulse scheduled for 15 Aug')">Schedule next pulse</button>
+            </div>
+            <div class="card mt"><h3>Upcoming 1:1s</h3><div class="hint">Synced from calendars</div>
+              <div class="list">
+                <div class="li"><div class="emp"><div class="av" style="background:var(--s1)">SG</div><div><b>Shiva ↔ Sana Gill</b><span>Wed 30 Jul · 4:00 pm</span></div></div></div>
+                <div class="li"><div class="emp"><div class="av" style="background:var(--s3)">AP</div><div><b>Ashima ↔ Apurva Thakur</b><span>Thu 31 Jul · 11:30 am · probation review</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= WORKFLOWS ================= -->
+      <section class="view" id="v-wf">
+        <div class="ph"><div><h1>Workflows</h1><div class="sub">Approval chains that power every request in OM People</div></div>
+          <div class="sp"></div><button class="btn" onclick="toast('Workflow builder would open here — drag steps to design an approval chain')">+ Create workflow</button></div>
+        <div class="card" style="padding:6px 16px">
+          <table class="tbl" id="wfTbl"><thead><tr><th>Workflow</th><th>Trigger</th><th>Chain</th><th>Applies to</th><th>Status</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- ================= REPORTS ================= -->
+      <section class="view" id="v-reports">
+        <div class="ph"><div><h1>Reports</h1><div class="sub">One-click exports — every report generates from live data</div></div></div>
+        <div class="grid g4" id="reportGrid"></div>
+      </section>
+
+      <!-- ================= AGENCY OPS ================= -->
+      <section class="view" id="v-agency">
+        <div class="ph"><div><h1>Agency Ops <span class="badge new">Not in Zimyo — built for OM</span></h1><div class="sub">Client allocation · utilization · capacity — the agency layer HR tools miss</div></div></div>
+        <div class="grid g4">
+          <div class="card kpi"><div class="lbl">Avg billable utilization</div><div class="val">71%</div><div class="delta up">▲ 5pts vs June · target 75%</div><div class="bar"><i style="width:71%;background:var(--s3)"></i></div></div>
+          <div class="card kpi"><div class="lbl">On the bench</div><div class="val">3</div><div class="delta nil">Available for new retainers</div></div>
+          <div class="card kpi"><div class="lbl">Overloaded (&gt;95%)</div><div class="val">4</div><div class="delta dn">Burnout risk — rebalance</div></div>
+          <div class="card kpi"><div class="lbl">Active client retainers</div><div class="val">12</div><div class="delta up">+2 this quarter</div></div>
+        </div>
+        <div class="grid g23 mt">
+          <div class="card"><h3>Utilization board</h3><div class="hint">Allocation by client — Digital Marketing team (hover a segment)</div>
+            <div id="utilBoard"></div>
+            <div class="legend" id="utilLegend"></div>
+          </div>
+          <div>
+            <div class="card"><h3>Burnout radar <span class="badge new">OM extra</span></h3><div class="hint">Hours + leave + mood signals, rule-based</div>
+              <div class="list">
+                <div class="li"><div class="emp"><div class="av" style="background:var(--crit)">KC</div><div><b>Kritika Chauhan</b><span>11.2h avg · no leave in 4 months</span></div></div><span class="pill bad">High</span></div>
+                <div class="li"><div class="emp"><div class="av" style="background:var(--s4)">SB</div><div><b>Somnath Bk</b><span>10.1h avg · 2 weekend punches</span></div></div><span class="pill warn">Watch</span></div>
+                <div class="li"><div class="emp"><div class="av" style="background:var(--s4)">PS</div><div><b>Priya Sethi</b><span>Mood dip 3 weeks running</span></div></div><span class="pill warn">Watch</span></div>
+              </div>
+            </div>
+            <div class="card mt"><h3>Capacity heatmap</h3><div class="hint">Next 12 weeks · all teams (darker = fuller)</div>
+              <div class="heat" id="heatmap"></div>
+              <div class="legend"><span><i style="background:#cde2fb"></i>&lt;60%</span><span><i style="background:#6da7ec"></i>60–85%</span><span><i style="background:#256abf"></i>85–95%</span><span><i style="background:#0d366b"></i>&gt;95%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card mt"><h3>Skills matrix <span class="badge new">OM extra</span></h3><div class="hint">Who can cover what — click a cell to see people</div>
+          <div style="overflow-x:auto"><table class="tbl" id="skillTbl"></table></div>
+        </div>
+      </section>
+
+      <!-- ================= AI ================= -->
+      <section class="view" id="v-ai">
+        <div class="ph"><div><h1>HR Copilot <span class="badge new">Not in Zimyo — built for OM</span></h1><div class="sub">Ask anything about your people data — this prototype answers from the sample dataset</div></div></div>
+        <div class="grid g23">
+          <div class="card ai">
+            <div class="log" id="aiLog">
+              <div class="msg bot">Hi Ashima 👋 I can answer questions from OM People's data. Try one of the suggestions, or ask your own.</div>
+            </div>
+            <div class="chips">
+              <button class="chip" onclick="askAI('Who is absent today?')">Who is absent today?</button>
+              <button class="chip" onclick="askAI('Leave balance of Kritika')">Leave balance of Kritika</button>
+              <button class="chip" onclick="askAI('Payroll cost this month')">Payroll cost this month</button>
+              <button class="chip" onclick="askAI('Who is on the bench?')">Who is on the bench?</button>
+            </div>
+            <div class="inrow"><input id="aiIn" placeholder="Ask HR Copilot…" onkeydown="if(event.key==='Enter')askAI()"><button class="btn" onclick="askAI()">Send</button></div>
+          </div>
+          <div class="card"><h3>What Copilot can do in production</h3><div class="hint">Wired to the real database later</div>
+            <div class="list" style="font-size:12.5px">
+              <div class="li">📄 Draft offer letters, warning letters &amp; certificates</div>
+              <div class="li">📊 Natural-language reports ("attrition by quarter")</div>
+              <div class="li">🔔 Proactive nudges — expiring docs, missed 1:1s</div>
+              <div class="li">🧮 Payroll anomaly detection before each run</div>
+              <div class="li">💬 Employee-facing policy Q&amp;A on Slack</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+<!-- overlays -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+<div class="drawer" id="drawer"><div class="dh" id="drawerHead"></div><div class="db" id="drawerBody"></div></div>
+
+<div class="modal" id="m-leave"><div class="mbox">
+  <div class="mh"><b>Apply for leave</b><button class="x" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <div class="fld"><label>Leave type</label><select id="lvType"><option>Casual Leave</option><option>Sick Leave</option><option>Earned Leave</option><option>Comp-off</option><option>Work From Home</option></select></div>
+    <div class="fld"><label>From</label><input type="date" id="lvFrom" value="2026-08-03"></div>
+    <div class="fld"><label>To</label><input type="date" id="lvTo" value="2026-08-04"></div>
+    <div class="fld"><label>Reason</label><textarea id="lvWhy" placeholder="Optional note for your approver"></textarea></div>
+  </div>
+  <div class="mf"><button class="btn ghost" onclick="closeAll()">Cancel</button><button class="btn" onclick="applyLeave()">Submit request</button></div>
+</div></div>
+
+<div class="modal" id="m-announce"><div class="mbox">
+  <div class="mh"><b>New announcement</b><button class="x" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <div class="fld"><label>Title</label><input id="anTitle" placeholder="e.g. Office closed on Raksha Bandhan"></div>
+    <div class="fld"><label>Message</label><textarea id="anBody" placeholder="Write your announcement…"></textarea></div>
+    <div class="fld"><label>Audience</label><select><option>Everyone</option><option>Digital Marketing</option><option>Managers only</option></select></div>
+  </div>
+  <div class="mf"><button class="btn ghost" onclick="closeAll()">Cancel</button><button class="btn" onclick="postAnnouncement()">Publish</button></div>
+</div></div>
+
+<div class="modal" id="m-addemp"><div class="mbox">
+  <div class="mh"><b>Add employee</b><button class="x" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <div class="fld"><label>Full name</label><input id="neName" placeholder="Name"></div>
+    <div class="fld"><label>Department</label><select id="neDept"></select></div>
+    <div class="fld"><label>Designation</label><input id="neDesig" placeholder="e.g. SEO Executive"></div>
+    <div class="fld"><label>Employment type</label><select id="neType"><option>Full-time</option><option>Intern</option><option>Contract</option></select></div>
+  </div>
+  <div class="mf"><button class="btn ghost" onclick="closeAll()">Cancel</button><button class="btn" onclick="addEmployee()">Create &amp; start onboarding</button></div>
+</div></div>
+
+<div class="cmdk" id="cmdk"><div class="box" onclick="event.stopPropagation()">
+  <input id="cmdkIn" placeholder="Search people, jump to a module, run an action…" oninput="cmdkFilter()">
+  <div class="res" id="cmdkRes"></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+<div class="tip" id="tip"></div>
+
+<script>
+/* ================= DATA ================= */
+const DEPTS = {"Digital Marketing":19,"Graphic Design":4,"Business Development":4,"Web Development":3,"Management":2,"HR":2,"Customer Success":2,"Content Writing":1};
+const DCOLORS = ["var(--s1)","var(--s2)","var(--s3)","var(--s4)","var(--s5)","var(--s7)","#7a8699","#a5794c"];
+const NAMED = [
+ ["Nitin Dong","Digital Marketing","Visual Artist","Probation","Full-time"],
+ ["Apurva Thakur","Digital Marketing","Digital Marketing Intern","Probation","Intern"],
+ ["Somnath Bk","Digital Marketing","Meta Ads Executive","Probation","Full-time"],
+ ["Jaskirat Singh","Digital Marketing","Digital Marketing Intern","Probation","Intern"],
+ ["Jatin Karla","Digital Marketing","Digital Marketing Intern","Probation","Intern"],
+ ["Kritika Chauhan","Digital Marketing","Meta Ads Executive","Active","Full-time"],
+ ["Simranjeet Kaur","Digital Marketing","Meta Ads Executive","Active","Full-time"],
+ ["Mercy Bhatti","Business Development","Business Development Intern","Probation","Intern"],
+ ["Ashima Parihar","HR","HR Admin","Active","Full-time"],
+ ["Shiva Kumar","Management","Founder & CEO","Active","Full-time"]];
+const POOL = ["Aarav Mehta","Sana Gill","Rohan Verma","Priya Sethi","Kabir Anand","Divya Rao","Arjun Nair","Ishita Bose","Vikram Kohli","Neha Sharma","Aditya Singh","Pooja Patel","Rahul Khanna","Tanvi Desai","Manish Gupta","Ritu Malhotra","Sahil Bajwa","Ananya Iyer","Deepak Joshi","Kavya Menon","Harsh Vardhan","Sneha Kapoor","Gaurav Saini","Nidhi Agarwal","Amit Chandel","Preeti Rana","Varun Thakral"];
+const DESIGS = {"Digital Marketing":["SEO Executive","PPC Analyst","Digital Marketing Executive","Social Media Executive"],"Graphic Design":["Graphic Designer","Sr. Graphic Designer"],"Business Development":["Business Developer","BD Executive"],"Web Development":["Web Developer","Frontend Developer"],"Management":["Operations Manager"],"HR":["HR Executive"],"Customer Success":["Customer Success Manager"],"Content Writing":["Content Writer"]};
+let EMP=[]; (function(){
+  let id=150, pi=0;
+  const need={...DEPTS};
+  NAMED.forEach(n=>{need[n[1]]--;});
+  NAMED.forEach((n,i)=>EMP.push({id:"EMP0M"+(id+i),name:n[0],dept:n[1],desig:n[2],status:n[3],type:n[4],loc:"Mohali",joined:n[4]==="Intern"?"May 2026":"2024–25"}));
+  id+=NAMED.length;
+  for(const d in need){for(let k=0;k<need[d];k++){const nm=POOL[pi++%POOL.length];const ds=DESIGS[d][k%DESIGS[d].length];EMP.push({id:"EMP0M"+(id++),name:nm,dept:d,desig:ds,status:Math.random()<.2?"Probation":"Active",type:"Full-time",loc:"Mohali",joined:"2023–25"});}}
+})();
+const CLIENTS=[["Dental Group · US",1],["SaaS Retainer · UK",2],["Realty · Dubai",3],["D2C Skincare · IN",4],["Law Firm · CA",5],["Internal / bench",0]];
+let INBOX=[
+ {id:1,t:"Leave request",who:"Simranjeet Kaur",type:"Casual Leave",d:"04–05 Aug · 2 days · cousin's wedding",wait:"3h"},
+ {id:2,t:"Leave request",who:"Rohan Verma",type:"Sick Leave",d:"28 Jul · 1 day · fever",wait:"1h"},
+ {id:3,t:"Regularisation",who:"Nitin Dong",type:"Attendance",d:"Missed punch-out Mon · actual 19:10",wait:"2d ⚠",od:1},
+ {id:4,t:"Expense claim",who:"Somnath Bk",type:"Reimbursement",d:"Meta Ads course ₹4,999",wait:"5h"},
+ {id:5,t:"Probation confirmation",who:"Apurva Thakur",type:"Core HR",d:"Due 09 Aug · mentor rating 4.2/5",wait:"6h"},
+ {id:6,t:"WFH request",who:"Tanvi Desai",type:"Work From Home",d:"31 Jul · plumber visit",wait:"2d ⚠",od:1}];
+let LEAVES=[
+ ["Simranjeet Kaur","Casual","04–05 Aug",2,"Pending"],
+ ["Rohan Verma","Sick","28 Jul",1,"Pending"],
+ ["Kabir Anand","Earned","11–15 Aug",5,"Approved"],
+ ["Divya Rao","Casual","01 Aug",1,"Approved"],
+ ["Jatin Karla","Intern","22 Jul",1,"Availed"]];
+let EXP=[
+ {who:"Somnath Bk",cat:"Learning",d:"Meta Ads certification",amt:4999,st:"Pending"},
+ {who:"Sana Gill",cat:"Travel",d:"Client visit — Chandigarh cabs",amt:2350,st:"Pending"},
+ {who:"Kritika Chauhan",cat:"Software",d:"Canva Pro annual (team)",amt:9600,st:"Pending"},
+ {who:"Deepak Joshi",cat:"Meals",d:"Late-night US shift dinners",amt:1501,st:"Pending"},
+ {who:"Priya Sethi",cat:"Travel",d:"Print vendor runs",amt:840,st:"Approved"}];
+const WFS=[["Leave Approval","Leave","Manager → HR","Company"],["Attendance Regularise","Regularisation","Manager","Company"],["Attendance Approval","Attendance","Manager","Company"],["Work From Home","WFH","Manager → HR","Company"],["On Duty","On Duty","Manager","Company"],["Compensatory Off","Comp-Off","Manager → HR","Company"],["Resignation Approval","Resignation","Manager → HR → CEO","Company"],["Expense Claim","Reimbursement","Manager → Finance","Company"],["Probation Confirmation","Core HR","Mentor → HR","Company"],["Restricted Holiday","Holiday","Manager","Company"]];
+const HOLS=[["Independence Day","15 Aug 2026","Saturday","National"],["Raksha Bandhan","28 Aug 2026","Friday","Restricted"],["Gandhi Jayanti","02 Oct 2026","Friday","National"],["Dussehra","20 Oct 2026","Tuesday","National"],["Diwali","08 Nov 2026","Sunday","National"],["Bhai Dooj","10 Nov 2026","Tuesday","Restricted"],["Guru Nanak Jayanti","24 Nov 2026","Tuesday","National"],["Christmas","25 Dec 2026","Friday","National"]];
+const REPORTS=[["Attendance Summary","Monthly presents, LOP, week-offs and holidays per employee.","attendance"],["Daily Attendance","Day-wise in/out details for every employee.","attendance"],["Leave Balance","Current balances across CL / SL / EL / comp-off.","leave"],["WFH Tracker","Work-from-home days with approval status.","attendance"],["Payroll Register","Gross, deductions and net pay for the month.","payroll"],["CTC Snapshot","Current salary structure of all employees.","payroll"],["Headcount & Attrition","Joiners, exits and attrition % by month.","employees"],["Probation Tracker","Everyone on probation with confirmation due dates.","employees"],["Utilization by Client","Billable allocation per employee per client. — OM extra","utilization"],["Burnout Risk","Hours, leave-gap and mood composite score. — OM extra","utilization"],["eNPS History","Quarterly promoter/passive/detractor split. — OM extra","engage"],["Kudos Leaderboard","Recognition given and received. — OM extra","engage"]];
+let FEED=[
+ {icon:"📣",t:"Office AC maintenance this Saturday",d:"Facilities · 2 days ago",body:"Office will open at 12 noon on Saturday."},
+ {icon:"🏆",t:"Kudos: Kritika Chauhan — 🎯 Client obsessed",d:"from Shiva · 3 days ago",body:"Saved the dental client's ad account after the iOS update tanked tracking."},
+ {icon:"🎉",t:"Welcome aboard, Mercy Bhatti!",d:"HR · 1 week ago",body:"Mercy joins Business Development as an intern."}];
+
+/* ================= HELPERS ================= */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const AVC=["var(--s1)","var(--s2)","var(--s3)","var(--s5)","var(--s7)"];
+const ini=n=>n.split(" ").map(x=>x[0]).slice(0,2).join("").toUpperCase();
+const av=(n,i)=>`<div class="av" style="background:${AVC[(n.length+(i||0))%AVC.length]}">${ini(n)}</div>`;
+const fmt=n=>"₹"+n.toLocaleString("en-IN");
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),2600);}
+function go(v){$$(".nitem").forEach(b=>b.classList.toggle("active",b.dataset.view===v));$$(".view").forEach(x=>x.classList.remove("on"));$("#v-"+v).classList.add("on");$("#content").scrollTop=0;}
+$$(".nitem").forEach(b=>b.onclick=()=>go(b.dataset.view));
+function switchTab(group,tab){const tabs=$(`.tabs[data-tabs="${group}"]`);tabs.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));$(`#tp-${group}`).querySelectorAll(".pane").forEach(p=>p.classList.toggle("on",p.dataset.pane===tab));}
+$$(".tabs").forEach(t=>t.querySelectorAll("button").forEach(b=>b.onclick=()=>switchTab(t.dataset.tabs,b.dataset.tab)));
+const style=document.createElement("style");style.textContent=".pane{display:none}.pane.on{display:block}";document.head.appendChild(style);
+function openModal(id){$("#overlay").classList.add("on");$("#"+id).classList.add("on");}
+function closeAll(){$("#overlay").classList.remove("on");$$(".modal").forEach(m=>m.classList.remove("on"));$("#drawer").classList.remove("on");}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeAll();$("#cmdk").classList.remove("on");}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openCmdk();}});
+function toggleTheme(){const r=document.documentElement;r.dataset.theme=r.dataset.theme==="dark"?"light":"dark";drawCharts();}
+/* clock in/out */
+let clockedIn=false,clockT0=0,clockInt;
+function toggleClock(){clockedIn=!clockedIn;const b=$("#clockBtn");if(clockedIn){clockT0=Date.now();b.classList.add("out");$("#clockLbl").textContent="Clock Out";clockInt=setInterval(()=>{const s=Math.floor((Date.now()-clockT0)/1000);$("#clockTimer").textContent="· "+String(Math.floor(s/3600)).padStart(2,"0")+":"+String(Math.floor(s/60)%60).padStart(2,"0")+":"+String(s%60).padStart(2,"0");},1000);toast("Clocked in at "+new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})+" — have a great day!");}else{clearInterval(clockInt);b.classList.remove("out");$("#clockLbl").textContent="Clock In";$("#clockTimer").textContent="";toast("Clocked out. Today's hours logged for payroll.");}}
+/* greeting */
+(function(){const h=new Date().getHours();$("#greet").textContent=(h<12?"Good morning":h<17?"Good afternoon":"Good evening")+", Ashima";$("#today").textContent=new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" · Mohali HQ";})();
+
+/* ================= SVG CHART HELPERS ================= */
+const tip=$("#tip");
+function tipShow(e,html){tip.innerHTML=html;tip.style.display="block";tipMove(e);}
+function tipMove(e){tip.style.left=Math.min(e.clientX+14,innerWidth-170)+"px";tip.style.top=(e.clientY-10)+"px";}
+function tipHide(){tip.style.display="none";}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function barChart(el,labels,series,opts={}){ /* series: [{name,color,data}] grouped */
+  const W=el.clientWidth||520,H=opts.h||220,P={t:14,r:8,b:34,l:30};
+  const max=Math.max(...series.flatMap(s=>s.data))*1.15||1;
+  const iw=(W-P.l-P.r)/labels.length;
+  const bw=Math.min(26,(iw-8)/series.length);
+  let g=`<svg width="${W}" height="${H}" style="display:block">`;
+  const ticks=4;for(let i=0;i<=ticks;i++){const y=P.t+(H-P.t-P.b)*i/ticks;const v=Math.round(max*(1-i/ticks));g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${y}" y2="${y}" stroke="${css('--grid')}" stroke-width="1"/><text x="${P.l-6}" y="${y+3}" font-size="10" fill="${css('--muted')}" text-anchor="end">${opts.fmt?opts.fmt(v):v}</text>`;}
+  labels.forEach((lb,i)=>{
+    const x0=P.l+iw*i+(iw-bw*series.length-(series.length-1)*2)/2;
+    series.forEach((s,si)=>{
+      const v=s.data[i],bh=(H-P.t-P.b)*v/max,x=x0+si*(bw+2),y=H-P.b-bh;
+      g+=`<rect x="${x}" y="${y}" width="${bw}" height="${Math.max(bh,1)}" rx="3" fill="${s.color}" data-tt="${s.name}: <b>${opts.fmt?opts.fmt(v):v}</b><br>${lb}"/>`;
+      if(opts.labels&&si===opts.labelSeries)g+=`<text x="${x+bw/2}" y="${y-5}" font-size="10.5" font-weight="600" fill="${css('--ink2')}" text-anchor="middle">${v}</text>`;
+    });
+    g+=`<text x="${P.l+iw*i+iw/2}" y="${H-P.b+16}" font-size="10.5" fill="${css('--muted')}" text-anchor="middle">${lb.length>9?lb.slice(0,8)+"…":lb}</text>`;
+  });
+  g+="</svg>";el.innerHTML=g;wireTips(el);
+  if(series.length>1)el.insertAdjacentHTML("beforeend",`<div class="legend">${series.map(s=>`<span><i style="background:${s.color}"></i>${s.name}</span>`).join("")}</div>`);
+}
+function hbarChart(el,rows,opts={}){ /* rows:[{label,value,color,note}] */
+  const W=el.clientWidth||520,rh=30,H=rows.length*rh+8,max=Math.max(...rows.map(r=>r.value))*1.1||1,L=opts.l||130;
+  let g=`<svg width="${W}" height="${H}" style="display:block">`;
+  rows.forEach((r,i)=>{const y=i*rh+6,bw=(W-L-70)*r.value/max;
+    g+=`<text x="${L-8}" y="${y+13}" font-size="11.5" fill="${css('--ink2')}" text-anchor="end">${r.label}</text>
+    <rect x="${L}" y="${y}" width="${Math.max(bw,2)}" height="18" rx="3" fill="${r.color}" data-tt="${r.label}: <b>${r.value}${opts.suffix||""}</b>${r.note?"<br>"+r.note:""}"/>
+    <text x="${L+bw+7}" y="${y+13}" font-size="11" font-weight="600" fill="${css('--ink')}">${r.value}${opts.suffix||""}</text>`;});
+  g+="</svg>";el.innerHTML=g;wireTips(el);
+}
+function donut(el,parts,center){const W=el.clientWidth||300,H=190,cx=W/2,cy=H/2,R=70,r=46;
+  const tot=parts.reduce((a,p)=>a+p.value,0)||1;let a0=-Math.PI/2,g=`<svg width="${W}" height="${H}" style="display:block">`;
+  parts.forEach(p=>{const a1=a0+2*Math.PI*p.value/tot;const large=(a1-a0)>Math.PI?1:0;
+    const x0=cx+R*Math.cos(a0),y0=cy+R*Math.sin(a0),x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1);
+    const xi=cx+r*Math.cos(a1),yi=cy+r*Math.sin(a1),xj=cx+r*Math.cos(a0),yj=cy+r*Math.sin(a0);
+    if(p.value>0)g+=`<path d="M${x0} ${y0} A${R} ${R} 0 ${large} 1 ${x1} ${y1} L${xi} ${yi} A${r} ${r} 0 ${large} 0 ${xj} ${yj} Z" fill="${p.color}" stroke="${css('--card')}" stroke-width="2" data-tt="${p.label}: <b>${p.value}</b> (${Math.round(p.value/tot*100)}%)"/>`;
+    a0=a1;});
+  g+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="22" font-weight="700" fill="${css('--ink')}">${center[0]}</text><text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="10.5" fill="${css('--muted')}">${center[1]}</text></svg>`;
+  el.innerHTML=g;wireTips(el);
+  el.insertAdjacentHTML("beforeend",`<div class="legend">${parts.map(p=>`<span><i style="background:${p.color}"></i>${p.label} ${p.value}</span>`).join("")}</div>`);
+}
+function lineChart(el,labels,series,opts={}){const W=el.clientWidth||520,H=opts.h||220,P={t:14,r:14,b:30,l:44};
+  const max=Math.max(...series.flatMap(s=>s.data))*1.15||1;
+  const X=i=>P.l+(W-P.l-P.r)*i/(labels.length-1),Y=v=>H-P.b-(H-P.t-P.b)*v/max;
+  let g=`<svg width="${W}" height="${H}" style="display:block">`;
+  for(let i=0;i<=4;i++){const y=P.t+(H-P.t-P.b)*i/4,v=Math.round(max*(1-i/4));g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${y}" y2="${y}" stroke="${css('--grid')}"/><text x="${P.l-6}" y="${y+3}" font-size="10" fill="${css('--muted')}" text-anchor="end">${opts.fmt?opts.fmt(v):v}</text>`;}
+  series.forEach(s=>{let d="";s.data.forEach((v,i)=>d+=(i?"L":"M")+X(i)+" "+Y(v));
+    g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linecap="round"/>`;
+    s.data.forEach((v,i)=>g+=`<circle cx="${X(i)}" cy="${Y(v)}" r="4" fill="${s.color}" stroke="${css('--card')}" stroke-width="2" data-tt="${s.name} · ${labels[i]}: <b>${opts.fmt?opts.fmt(v):v}</b>"/>`);});
+  labels.forEach((lb,i)=>g+=`<text x="${X(i)}" y="${H-P.b+16}" font-size="10.5" fill="${css('--muted')}" text-anchor="middle">${lb}</text>`);
+  g+="</svg>";el.innerHTML=g;wireTips(el);
+  if(series.length>1)el.insertAdjacentHTML("beforeend",`<div class="legend">${series.map(s=>`<span><i style="background:${s.color}"></i>${s.name}</span>`).join("")}</div>`);
+}
+function wireTips(el){el.querySelectorAll("[data-tt]").forEach(n=>{n.addEventListener("mousemove",e=>{tipShow(e,n.dataset.tt);});n.addEventListener("mouseleave",tipHide);});}
+
+/* ================= RENDER CHARTS ================= */
+function drawCharts(){
+  lineChart($("#ch-head"),["May","Jun","Jul"],[{name:"Total employees",color:css("--s1"),data:[38,37,38]},{name:"New joiners",color:css("--s3"),data:[1,3,1]},{name:"Offboarded",color:css("--s2"),data:[4,0,2]}]);
+  hbarChart($("#ch-dept"),Object.entries(DEPTS).map(([d,v],i)=>({label:d.replace("Business Development","Biz Dev").replace("Customer Success","Cust. Success"),value:v,color:i===0?css("--s1"):css("--s1")})),{l:110});
+  donut($("#ch-attToday"),[{label:"Present",value:29,color:css("--s1")},{label:"Absent",value:7,color:css("--s2")},{label:"Week off",value:1,color:css("--s4")}],["29/37","present"]);
+  hbarChart($("#ch-mood"),[{label:"😄 Happy",value:13.5,color:css("--s3")},{label:"😌 Calm",value:10.8,color:css("--s1")},{label:"😴 Sleepy",value:2.7,color:css("--s4")},{label:"😑 Dull",value:2.7,color:css("--s5")},{label:"😞 Sad",value:5.4,color:css("--s2")},{label:"No response",value:64.9,color:css("--grid")}],{suffix:"%",l:110});
+  barChart($("#ch-hours"),["<5h","5–6h","6–7h","7–8h","8–9h",">9h"],[{name:"Employees",color:css("--s1"),data:[1,0,0,0,3,30]}],{labels:true,labelSeries:0});
+  barChart($("#ch-arrival"),["9:00","9:30","10:00","10:30","11:00","11:30+"],[{name:"Clock-ins",color:css("--s3"),data:[3,9,13,3,1,0]}],{labels:true,labelSeries:0});
+  lineChart($("#ch-ctc"),["Feb","Mar","Apr","May","Jun","Jul"],[{name:"Gross",color:css("--s1"),data:[1310000,1350000,1330000,1390000,1400000,1420000]},{name:"Deductions",color:css("--s2"),data:[152000,158000,155000,161000,163000,165000]}],{fmt:v=>"₹"+(v/100000).toFixed(1)+"L"});
+  barChart($("#ch-rating"),["1 ★","2 ★","3 ★","4 ★","5 ★"],[{name:"Employees",color:css("--s7"),data:[0,2,14,16,5]}],{labels:true,labelSeries:0});
+}
+
+/* ================= TABLES & LISTS ================= */
+function statusPill(s){return s==="Active"?'<span class="pill ok">Active</span>':s==="Probation"?'<span class="pill warn">Probation</span>':'<span class="pill bad">'+s+'</span>';}
+function renderEmpTable(){
+  const q=($("#empSearch").value||"").toLowerCase(),d=$("#empDept").value,st=$("#empStatus").value;
+  const rows=EMP.filter(e=>(!q||e.name.toLowerCase().includes(q)||e.id.toLowerCase().includes(q)||e.desig.toLowerCase().includes(q))&&(!d||e.dept===d)&&(!st||e.status===st));
+  $("#empRows").innerHTML=rows.map((e,i)=>`<tr class="click" onclick="openProfile('${e.id}')">
+    <td><div class="emp">${av(e.name,i)}<div><b>${e.name}</b><span>${e.id} · ${e.name.split(" ")[0].toLowerCase()}@offshoremarketers.in</span></div></div></td>
+    <td>${e.dept}</td><td>${e.desig}</td><td>${e.loc}</td><td>${statusPill(e.status)}</td><td>${e.type}</td><td>${e.joined}</td></tr>`).join("")||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">No employees match.</td></tr>';
+}
+function openProfile(id){const e=EMP.find(x=>x.id===id);if(!e)return;
+  $("#drawerHead").innerHTML=`<div class="emp">${av(e.name)}<div><b style="font-size:15px">${e.name}</b><span>${e.desig} · ${e.dept}</span></div></div><button class="x" onclick="closeAll()">✕</button>`;
+  $("#drawerBody").innerHTML=`
+  <div class="subgrid"><div class="stat"><b>${e.id}</b><span>Employee ID</span></div><div class="stat"><b>${e.loc}</b><span>Location</span></div>
+  <div class="stat"><b>${e.type}</b><span>Employment type</span></div><div class="stat"><b>${e.status}</b><span>Status</span></div></div>
+  <h3 class="mt" style="font-size:13px">This month</h3>
+  <div class="subgrid mt" style="margin-top:8px"><div class="stat"><b>22/23</b><span>Days present</span></div><div class="stat"><b>9h 18m</b><span>Avg hours</span></div><div class="stat"><b>6.5</b><span>Leave balance</span></div><div class="stat"><b>74%</b><span>Utilization</span></div></div>
+  <h3 class="mt" style="font-size:13px">Quick actions</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+    <button class="btn sm ghost" onclick="toast('Payslip for July emailed to ${e.name.split(" ")[0]}')">Send payslip</button>
+    <button class="btn sm ghost" onclick="toast('Letter builder would open — offer, increment, experience…')">Generate letter</button>
+    <button class="btn sm ghost" onclick="toast('1:1 scheduled with ${e.name.split(" ")[0]}')">Schedule 1:1</button>
+    <button class="btn sm ghost" onclick="toast('Asset register opened for ${e.name.split(" ")[0]}')">Assets</button>
+  </div>
+  <h3 class="mt" style="font-size:13px">Timeline</h3>
+  <div class="list" style="font-size:12.5px">
+    <div class="li">🎉 Joined Offshore Marketers · ${e.joined}</div>
+    <div class="li">📄 Contract signed &amp; docs verified</div>
+    ${e.status==="Probation"?'<div class="li">⏳ Probation review due soon</div>':'<div class="li">✅ Probation confirmed</div>'}
+  </div>`;
+  $("#overlay").classList.add("on");$("#drawer").classList.add("on");
+}
+function renderInbox(){
+  const tb=$("#inboxTbl tbody");
+  tb.innerHTML=INBOX.map(r=>`<tr>
+    <td><b>${r.t}</b></td><td><div class="emp">${av(r.who)}<b>${r.who}</b></div></td>
+    <td><span class="pill info">${r.type}</span></td><td style="max-width:260px">${r.d}</td>
+    <td>${r.od?'<span class="pill bad">'+r.wait+'</span>':r.wait}</td>
+    <td style="text-align:right;white-space:nowrap"><button class="btn sm good" onclick="actInbox(${r.id},1)">Approve</button> <button class="btn sm ghost" onclick="actInbox(${r.id},0)">Reject</button></td></tr>`).join("")
+    ||'<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">🎉 Inbox zero — nothing pending.</td></tr>';
+  const n=INBOX.length;$("#inboxCount").textContent=n;$("#kpiPending").textContent=n;$("#inboxCount").style.display=n?"":"none";
+}
+function actInbox(id,ok){const r=INBOX.find(x=>x.id===id);INBOX=INBOX.filter(x=>x.id!==id);renderInbox();
+  if(r.t==="Leave request"){const lv=LEAVES.find(l=>l[0]===r.who&&l[4]==="Pending");if(lv)lv[4]=ok?"Approved":"Rejected";renderLeaves();}
+  toast((ok?"Approved":"Rejected")+" — "+r.t.toLowerCase()+" from "+r.who+(ok?". They've been notified ✅":"."));}
+function renderLeaves(){$("#leaveTbl tbody").innerHTML=LEAVES.map(l=>`<tr><td><div class="emp">${av(l[0])}<b>${l[0]}</b></div></td><td>${l[1]}</td><td>${l[2]}</td><td>${l[3]}</td><td>${l[4]==="Approved"?'<span class="pill ok">Approved</span>':l[4]==="Pending"?'<span class="pill warn">Pending</span>':l[4]==="Rejected"?'<span class="pill bad">Rejected</span>':'<span class="pill gray">'+l[4]+'</span>'}</td></tr>`).join("");}
+function renderExp(){$("#expTbl tbody").innerHTML=EXP.map((x,i)=>`<tr><td><div class="emp">${av(x.who)}<b>${x.who}</b></div></td><td>${x.cat}</td><td>${x.d}</td><td><b>${fmt(x.amt)}</b></td>
+  <td>${x.st==="Approved"?'<span class="pill ok">Approved</span>':'<span class="pill warn">Pending</span>'}</td>
+  <td style="text-align:right">${x.st==="Pending"?`<button class="btn sm good" onclick="approveExp(${i})">Approve</button>`:"Paid with July payroll"}</td></tr>`).join("");
+  const pend=EXP.filter(x=>x.st==="Pending");$("#kpiReimb").textContent=fmt(pend.reduce((a,x)=>a+x.amt,0));$("#kpiReimbN").textContent=pend.length;}
+function approveExp(i){EXP[i].st="Approved";renderExp();toast("Claim approved — will be paid with July payroll");}
+function renderWf(){$("#wfTbl tbody").innerHTML=WFS.map(w=>`<tr><td><b>${w[0]}</b></td><td>${w[1]}</td><td><span class="pill gray">${w[2]}</span></td><td>${w[3]} · 37</td><td><span class="pill ok">Active</span></td></tr>`).join("");}
+function renderHols(){$("#holRows").innerHTML=HOLS.map(h=>`<tr><td><b>${h[0]}</b></td><td>${h[1]}</td><td>${h[2]}</td><td>${h[3]==="National"?'<span class="pill info">National</span>':'<span class="pill gray">Restricted</span>'}</td></tr>`).join("");}
+function renderReports(){$("#reportGrid").innerHTML=REPORTS.map(r=>{const om=r[1].includes("OM extra");return`<div class="report"><b>${r[0]}</b> ${om?'<span class="badge new">OM</span>':""}<p>${r[1].replace(" — OM extra","")}</p><button class="btn ghost sm" onclick="exportCSV('${r[2]}')">⬇ Download CSV</button></div>`;}).join("");}
+function renderFeed(){$("#feedList").innerHTML=FEED.map(f=>`<div class="li" style="align-items:flex-start"><span style="font-size:20px">${f.icon}</span><div><b style="font-size:13px">${f.t}</b><br><span style="font-size:11px;color:var(--muted)">${f.d}</span><p style="font-size:12.5px;margin-top:4px;color:var(--ink2)">${f.body}</p></div></div>`).join("");}
+function renderPolicies(){const P=[["Leave Policy","12 CL · 6 SL · 15 EL · sandwich rule","v3 · Apr 2026"],["WFH Policy","2 days/month with manager approval","v2 · Jan 2026"],["Reimbursement Policy","Learning ₹10k/yr · travel at actuals","v1 · Sep 2025"],["POSH Policy","Committee, complaint & redressal process","v2 · Mar 2026"],["Probation & Confirmation","90 days · mentor rating ≥ 3.5","v1 · Aug 2025"],["Exit Policy","30-day notice · FNF in 45 days","v1 · Aug 2025"]];
+ $("#policyCards").innerHTML=P.map(p=>`<div class="card"><h3>${p[0]}</h3><div class="hint">${p[2]}</div><p style="font-size:12.5px;color:var(--ink2)">${p[1]}</p><button class="btn ghost sm mt" onclick="toast('${p[0]} opened — employees see this in their self-serve portal')">Read policy</button></div>`).join("");}
+function renderOrg(){
+  const lead=(n,r)=>`<div class="orgcard"><b>${n}</b><span>${r}</span></div>`;
+  $("#orgChart").innerHTML=`
+   <div class="orgrow">${lead("Shiva Kumar","Founder & CEO")}</div><div class="orgline"></div>
+   <div class="orgrow">${lead("Ops Manager","Management")}${lead("Ashima Parihar","HR Admin")}</div><div class="orgline"></div>
+   <div class="orgrow">${lead("DM Lead","Digital Marketing · 19")}${lead("Design Lead","Graphic Design · 4")}${lead("BD Lead","Biz Dev · 4")}${lead("Web Lead","Web Dev · 3")}${lead("CS Lead","Cust. Success · 2")}</div>`;
+}
+/* OKRs */
+function renderOKRs(){const O=[["Grow retainer revenue 25% QoQ",72,"var(--s3)"],["Client NPS ≥ 60 across retainers",64,"var(--s1)"],["Launch 2 productized service lines",45,"var(--s4)"],["Hire & onboard 5 A-players",80,"var(--s7)"]];
+ $("#okrList").innerHTML=O.map(o=>`<div class="li"><div style="flex:1"><b style="font-size:13px">${o[0]}</b><div style="display:flex;align-items:center;gap:10px;margin-top:6px"><div class="progress"><i style="width:${o[1]}%;background:${o[2]}"></i></div><b style="font-size:12px">${o[1]}%</b></div></div></div>`).join("");}
+/* Agency ops */
+function renderUtil(){
+  const rows=[["Kritika Chauhan",[35,40,22,0,0,3]],["Somnath Bk",[50,30,15,0,0,5]],["Simranjeet Kaur",[0,45,25,20,0,10]],["Sana Gill",[20,0,30,30,10,10]],["Aarav Mehta",[0,0,0,40,35,25]],["Nitin Dong",[15,15,10,20,0,40]],["Jaskirat Singh",[0,0,0,0,0,100]]];
+  const C=[css("--s1"),css("--s2"),css("--s3"),css("--s4"),css("--s5"),css("--grid")];
+  $("#utilBoard").innerHTML=rows.map(r=>{const tot=100-r[1][5];
+   return`<div class="utilrow"><div class="emp">${av(r[0])}<b>${r[0]}</b></div>
+   <div class="utilbar">${r[1].map((v,i)=>v?`<i style="width:${v}%;background:${C[i]}" data-tt="${CLIENTS[i][0]}: <b>${v}%</b><br>${r[0]}"></i>`:"").join("")}</div>
+   <b style="font-size:12.5px;color:${tot>95?css('--crit'):tot<50?css('--s4'):css('--goodtext')}">${tot}% billable</b></div>`;}).join("");
+  $("#utilLegend").innerHTML=CLIENTS.map((c,i)=>`<span><i style="background:${C[i]}"></i>${c[0]}</span>`).join("");
+  wireTips($("#utilBoard"));
+}
+function renderHeat(){const cells=[];const teams=8;for(let t=0;t<teams;t++)for(let w=0;w<12;w++){cells.push(Math.min(1,.35+Math.sin(t*2.7+w*.9)*.25+w*.04+((t*7+w*13)%10)/40));}
+  $("#heatmap").innerHTML=cells.map((v,i)=>{const c=v>.95?"#0d366b":v>.85?"#256abf":v>.6?"#6da7ec":"#cde2fb";const team=["DM","Design","BD","Web","CS","Content","HR","Mgmt"][Math.floor(i/12)];return`<i style="background:${c}" data-tt="${team} · week ${i%12+1}: <b>${Math.round(v*100)}% booked</b>"></i>`;}).join("");wireTips($("#heatmap"));}
+function renderSkills(){
+  const skills=["SEO","Meta Ads","Google Ads","Design","Video","Web Dev","Copy","Analytics"];
+  const people=["Kritika","Somnath","Simranjeet","Nitin","Sana","Aarav","Jatin"];
+  const lv=[[1,3,2,0,0,0,1,2],[0,3,3,0,0,0,0,2],[1,3,1,0,0,0,1,1],[0,0,0,3,2,0,0,0],[2,1,1,0,0,0,3,1],[3,0,2,0,0,1,2,3],[1,2,0,0,0,0,1,0]];
+  const dot=n=>n===3?'<span class="pill ok">Expert</span>':n===2?'<span class="pill info">Solid</span>':n===1?'<span class="pill gray">Basic</span>':'<span style="color:var(--grid)">—</span>';
+  $("#skillTbl").innerHTML=`<thead><tr><th>Person</th>${skills.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody>${people.map((p,i)=>`<tr><td><b>${p}</b></td>${lv[i].map(n=>`<td>${dot(n)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+}
+/* payroll wizard */
+let payIdx=0;
+const PAYBODY=[
+ `<h3>Step 1 — Lock leave &amp; attendance</h3><div class="hint">Snapshot attendance for 01–31 July before computing pay</div>
+  <div class="grid g3 mt"><div class="stat"><b>37</b><span>Employees in scope</span></div><div class="stat"><b>2</b><span>Unregularised days</span></div><div class="stat"><b>1</b><span>LOP flagged</span></div></div>
+  <div class="notice mt">⚠ Nitin Dong has 1 missed punch-out. Locking now treats it as half-day LOP unless regularised.</div>`,
+ `<h3>Step 2 — Process arrears</h3><div class="hint">Increments &amp; corrections effective this cycle</div>
+  <div class="list mt"><div class="li"><b>Kritika Chauhan</b><span style="color:var(--muted)">— increment w.e.f. 01 Jun</span><b style="margin-left:auto">+ ₹8,400</b></div>
+  <div class="li"><b>Deepak Joshi</b><span style="color:var(--muted)">— shift allowance June recompute</span><b style="margin-left:auto">+ ₹2,100</b></div></div>`,
+ `<h3>Step 3 — Review &amp; run</h3><div class="hint">Validated against ESI, PF, PT &amp; minimum wage rules</div>
+  <div class="grid g3 mt"><div class="stat"><b>₹14.2L</b><span>Gross payout</span></div><div class="stat"><b>₹1.65L</b><span>Deductions (PF+ESI+PT+TDS)</span></div><div class="stat"><b>₹12.55L</b><span>Net transfer</span></div></div>
+  <div class="notice mt">✅ 0 compliance exceptions. Bank file will be generated for HDFC corporate portal.</div>`,
+ `<h3>Step 4 — Publish payslips</h3><div class="hint">Payslips go to each employee's self-serve portal &amp; email</div>
+  <div class="stat mt" style="text-align:center;padding:26px"><b style="font-size:26px">🎉 July payroll complete</b><span>37 payslips published · WhatsApp + email notifications sent</span></div>`];
+function payStep(d){payIdx=Math.max(0,Math.min(3,payIdx+d));
+  $$("#paySteps .step").forEach((s,i)=>{s.classList.toggle("on",i===payIdx);s.classList.toggle("done",i<payIdx);});
+  $("#payStepBody").innerHTML=PAYBODY[payIdx];
+  $("#payBack").style.display=payIdx?"":"none";
+  $("#payNext").textContent=["Lock attendance & proceed →","Apply arrears & continue →","Run payroll ✓","Done — back to overview"][payIdx];
+  if(d>0&&payIdx===3)toast("Payroll run recorded (prototype — no real money moved!)");
+  if(payIdx===3&&d===1&&$("#payNext").dataset.f){switchTab('pay','payd');payIdx=0;payStep(0);}
+  $("#payNext").dataset.f=payIdx===3?"1":"";}
+payStep(0);
+/* payslips */
+function renderSlips(){const rows=EMP.slice(0,10).map((e,i)=>{const g=e.type==="Intern"?15000:30000+((i*7919)%38000);const d=Math.round(g*.115);return`<tr><td><div class="emp">${av(e.name,i)}<div><b>${e.name}</b><span>${e.desig}</span></div></div></td><td>${fmt(g)}</td><td>${fmt(d)}</td><td><b>${fmt(g-d)}</b></td><td><span class="pill ok">Published</span></td><td style="text-align:right"><button class="btn sm ghost" onclick="toast('Payslip PDF preview would open')">View</button></td></tr>`;}).join("");
+ $("#slipRows").innerHTML=rows+`<tr><td colspan="6" style="text-align:center;color:var(--muted);font-size:12px">…and 27 more</td></tr>`;}
+/* actions list on dashboard */
+function renderActions(){$("#actionList").innerHTML=[
+ ["🕐","2 approvals overdue > 48h","inbox"],["📄","5 mandatory documents missing","corehr"],["💰","11 investment declarations open","pay"],["🎯","6 employees have no Q3 goals","perf"],["🔥","1 burnout flag needs attention","agency"]].map(a=>`<div class="li" style="cursor:pointer" onclick="go('${a[2]}')"><span>${a[0]}</span><span style="flex:1;font-size:12.5px">${a[1]}</span><span style="color:var(--s1);font-size:12px;font-weight:600">Open →</span></div>`).join("");}
+/* engage interactions */
+$$("#moodPick .mood").forEach(m=>m.onclick=()=>{$$("#moodPick .mood").forEach(x=>x.classList.remove("sel"));m.classList.add("sel");toast("Thanks! Your mood was recorded anonymously "+m.textContent.trim().slice(0,2));});
+function giveKudos(){const who=$("#kudosWho").value,val=$("#kudosVal").value;FEED.unshift({icon:"🏆",t:`Kudos: ${who} — ${val}`,d:"from Ashima · just now",body:"Recognised on the company feed."});renderFeed();toast("Kudos posted to the feed 🎉");}
+function postAnnouncement(){const t=$("#anTitle").value.trim()||"Untitled announcement";FEED.unshift({icon:"📣",t,d:"HR · just now",body:$("#anBody").value.trim()||""});renderFeed();closeAll();toast("Announcement published to everyone");}
+function applyLeave(){const t=$("#lvType").value;LEAVES.unshift(["Ashima Parihar",t.replace(" Leave",""),"03–04 Aug",2,"Pending"]);INBOX.push({id:Date.now(),t:"Leave request",who:"Ashima Parihar",type:t,d:"03–04 Aug · 2 days",wait:"now"});renderLeaves();renderInbox();closeAll();toast(t+" request submitted — routed via Leave Approval workflow");}
+function addEmployee(){const n=$("#neName").value.trim();if(!n){toast("Please enter a name");return;}
+ EMP.unshift({id:"EMP0M"+(190+EMP.length),name:n,dept:$("#neDept").value,desig:$("#neDesig").value||"New joiner",status:"Probation",type:$("#neType").value,loc:"Mohali",joined:"Aug 2026"});
+ renderEmpTable();closeAll();go("corehr");toast(n+" added — onboarding checklist created (offer, docs, assets, buddy)");}
+/* CSV export */
+function exportCSV(kind){
+ let rows=[["Report",kind,"Generated","OM People prototype"]];
+ if(kind==="employees")rows=[["ID","Name","Department","Designation","Status","Type","Location"],...EMP.map(e=>[e.id,e.name,e.dept,e.desig,e.status,e.type,e.loc])];
+ else if(kind==="payroll")rows=[["Name","Gross","Deductions","Net"],...EMP.slice(0,10).map((e,i)=>{const g=e.type==="Intern"?15000:30000+((i*7919)%38000);const d=Math.round(g*.115);return[e.name,g,d,g-d];})];
+ else if(kind==="leave")rows=[["Employee","Type","Dates","Days","Status"],...LEAVES];
+ else if(kind==="utilization")rows=[["Employee","Billable %"],["Kritika Chauhan",97],["Somnath Bk",95],["Simranjeet Kaur",90],["Sana Gill",90],["Aarav Mehta",75],["Nitin Dong",60],["Jaskirat Singh",0]];
+ else if(kind==="attendance")rows=[["Employee","Present","Absent","WFH","LOP"],...EMP.slice(0,12).map(e=>[e.name,22,1,0,0])];
+ else if(kind==="engage")rows=[["Quarter","eNPS"],["Q4 FY25",31],["Q1 FY26",38],["Q2 FY26",42]];
+ const csv=rows.map(r=>r.join(",")).join("\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`om-people-${kind}.csv`;a.click();
+ toast("Report downloaded — "+kind+".csv");}
+/* AI copilot */
+function askAI(q){q=q||$("#aiIn").value.trim();if(!q)return;$("#aiIn").value="";
+ const log=$("#aiLog");log.insertAdjacentHTML("beforeend",`<div class="msg user">${q}</div>`);
+ const lq=q.toLowerCase();let a="In production I'd query the live database for that. In this prototype, try the suggested questions below the chat 🙂";
+ if(lq.includes("absent"))a="7 people are absent today:\n• 2 uninformed — Rahul Khanna, Manish Gupta (I've pinged their managers)\n• 5 informed (sick/personal)\n\nWant me to draft a follow-up message for the uninformed absences?";
+ else if(lq.includes("kritika"))a="Kritika Chauhan — leave balance:\n• Casual: 4 of 12 left\n• Sick: 6 of 6 left\n• Comp-off: 1 (expires 15 Aug)\n\n⚠ Note: she hasn't taken a single leave in 4 months and is on my burnout radar. Maybe encourage a break?";
+ else if(lq.includes("payroll")||lq.includes("cost"))a="July 2026 payroll (estimated):\n• Gross: ₹14.2L (+2.1% vs June)\n• Deductions: ₹1.65L\n• Net transfer: ₹12.55L\n• Plus reimbursements pending: ₹18,450\n\nBiggest cost centre: Digital Marketing (19 people, ~₹6.8L).";
+ else if(lq.includes("bench"))a="3 people are effectively on the bench:\n• Jaskirat Singh — 0% billable (training)\n• Nitin Dong — 60% billable\n• Jatin Karla — internal projects\n\nBD has 2 proposals in late stage — I'd earmark Jaskirat for the dental prospect.";
+ else if(lq.includes("probation"))a="5 probation confirmations are due. The nearest: Apurva Thakur on 09 Aug (mentor rating 4.2/5 — safe to confirm).";
+ setTimeout(()=>{log.insertAdjacentHTML("beforeend",`<div class="msg bot">${a}</div>`);log.scrollTop=log.scrollHeight;},450);
+ log.scrollTop=log.scrollHeight;}
+/* cmdk */
+const CMDS=[["Go to Dashboard","view","dash"],["Go to Inbox","view","inbox"],["Go to Core HR","view","corehr"],["Go to Attendance & Leave","view","att"],["Go to Payroll","view","pay"],["Go to Performance","view","perf"],["Go to Engage","view","engage"],["Go to Agency Ops","view","agency"],["Ask HR Copilot","view","ai"],["Apply for leave","modal","m-leave"],["Post announcement","modal","m-announce"],["Add employee","modal","m-addemp"],["Toggle dark mode","fn","theme"]];
+function openCmdk(){$("#cmdk").classList.add("on");$("#cmdkIn").value="";cmdkFilter();setTimeout(()=>$("#cmdkIn").focus(),40);}
+$("#cmdk").onclick=()=>$("#cmdk").classList.remove("on");
+function cmdkFilter(){const q=$("#cmdkIn").value.toLowerCase();
+ const emps=EMP.filter(e=>q&&e.name.toLowerCase().includes(q)).slice(0,4).map(e=>[`Open profile — ${e.name}`,"emp",e.id]);
+ const cmds=CMDS.filter(c=>c[0].toLowerCase().includes(q));
+ $("#cmdkRes").innerHTML=[...emps,...cmds].map(c=>`<div class="r" onclick="cmdkRun('${c[1]}','${c[2]}')">${c[0]}<span>${c[1]==="emp"?"person":"action"}</span></div>`).join("")||'<div class="r">No results</div>';}
+function cmdkRun(kind,arg){$("#cmdk").classList.remove("on");
+ if(kind==="view")go(arg);else if(kind==="modal")openModal(arg);else if(kind==="emp")openProfile(arg);else if(arg==="theme")toggleTheme();}
+/* populate selects */
+(function(){const opts=Object.keys(DEPTS).map(d=>`<option>${d}</option>`).join("");$("#empDept").innerHTML+=opts;$("#neDept").innerHTML=opts;
+ $("#kudosWho").innerHTML=EMP.slice(0,12).map(e=>`<option>${e.name}</option>`).join("");})();
+/* init */
+renderEmpTable();renderInbox();renderLeaves();renderExp();renderWf();renderHols();renderReports();renderFeed();renderPolicies();renderOrg();renderOKRs();renderUtil();renderHeat();renderSkills();renderSlips();renderActions();
+drawCharts();
+window.addEventListener("resize",()=>{clearTimeout(window._rz);window._rz=setTimeout(drawCharts,200);});
+</script>
+</body>
+</html>
