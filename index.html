@@ -450,9 +450,31 @@ input,select,textarea{font:inherit;color:inherit}
 <div class="modal" id="m-myprof"><div class="mbox">
   <div class="mh"><b>My profile</b><button class="x" onclick="closeAll()">✕</button></div>
   <div class="mb">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+      <div id="mpAvatar" style="width:72px;height:72px;border-radius:50%;background:var(--s7);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;overflow:hidden;flex-shrink:0"></div>
+      <div>
+        <label for="mpFile" class="btn ghost sm" style="cursor:pointer">📷 Change photo</label>
+        <input type="file" id="mpFile" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="uploadAvatar(this)">
+        <p style="font-size:11px;color:var(--muted);margin-top:6px">JPG/PNG, we resize it automatically.</p>
+      </div>
+    </div>
     <div class="fld"><label>Full name *</label><input id="mpName" maxlength="60"></div>
-    <div class="fld"><label>Work email</label><input id="mpEmail" disabled style="opacity:.65"></div>
-    <div class="fld"><label>Role</label><input id="mpRole" disabled style="opacity:.65"></div>
+    <div class="subgrid">
+      <div class="fld"><label>Date of birth</label><input type="date" id="mpDob"></div>
+      <div class="fld"><label>Phone</label><input id="mpPhone" maxlength="10" inputmode="numeric" placeholder="10-digit mobile"></div>
+      <div class="fld"><label>Gender</label><select id="mpGender"><option value="">—</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+      <div class="fld"><label>Blood group</label><select id="mpBlood"><option value="">—</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+      <div class="fld"><label>Emergency contact name</label><input id="mpEmName" maxlength="60"></div>
+      <div class="fld"><label>Emergency contact phone</label><input id="mpEmPhone" maxlength="10" inputmode="numeric"></div>
+    </div>
+    <div class="fld"><label>Address</label><textarea id="mpAddress" maxlength="200" placeholder="City, state"></textarea></div>
+    <div class="notice" style="margin-bottom:10px">🔒 <div style="font-size:12px">Set by HR — contact them for changes:</div></div>
+    <div class="subgrid">
+      <div class="fld"><label>Work email</label><input id="mpEmail" disabled style="opacity:.65"></div>
+      <div class="fld"><label>Role</label><input id="mpRole" disabled style="opacity:.65"></div>
+      <div class="fld"><label>Designation</label><input id="mpDesig" disabled style="opacity:.65"></div>
+      <div class="fld"><label>Department</label><input id="mpDept" disabled style="opacity:.65"></div>
+    </div>
     <p id="mpErr" style="color:var(--crit);font-size:12px;min-height:15px"></p>
   </div>
   <div class="mf"><button class="btn ghost" onclick="closeAll()">Cancel</button><button class="btn" onclick="saveMyProfile()">Save changes</button></div>
@@ -632,7 +654,7 @@ async function enterApp(){
   const name=ME.full_name||nice(ME.email);
   $("#whoName").textContent=name;
   $("#whoRole").textContent=ME.role==="admin"?"Admin":ME.role==="hr"?"HR":"Employee";
-  $("#whoAv").textContent=ini(name);
+  setAvatarEls();
   const h=new Date().getHours();
   $("#greet").textContent=(h<12?"Good morning":h<17?"Good afternoon":"Good evening")+", "+name.split(" ")[0];
   $("#today").textContent=new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" · Mohali HQ";
@@ -899,20 +921,70 @@ async function saveEmp(){
   closeAll();await loadAll();toast("Profile updated ✅");
 }
 /* ---- my profile ---- */
+function myRegisterRow(){return EMP.find(e=>(e.email||"").toLowerCase()===ME.email.toLowerCase())||null;}
+function setAvatarEls(){
+  const url=ME.avatar_url?ME.avatar_url+"?t="+(ME._avT||""):null;
+  const name=ME.full_name||nice(ME.email);
+  const img=u=>`<img src="${u}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  $("#whoAv").innerHTML=url?img(url):ini(name);
+  const mp=$("#mpAvatar");if(mp)mp.innerHTML=url?img(url):ini(name);
+}
 function openMyProfile(){
+  const L=dateLims();
   $("#mpName").value=ME.full_name||"";
+  $("#mpDob").value=ME.dob||"";$("#mpDob").min=L.dobMin;$("#mpDob").max=L.dobMax;
+  $("#mpPhone").value=ME.phone||"";
+  $("#mpGender").value=ME.gender||"";
+  $("#mpBlood").value=ME.blood_group||"";
+  $("#mpEmName").value=ME.emergency_name||"";
+  $("#mpEmPhone").value=ME.emergency_phone||"";
+  $("#mpAddress").value=ME.address||"";
   $("#mpEmail").value=ME.email;
   $("#mpRole").value=ME.role==="admin"?"Admin":ME.role==="hr"?"HR":"Employee";
+  const reg=myRegisterRow();
+  $("#mpDesig").value=reg?.designation||"—";
+  $("#mpDept").value=reg?.dept||"—";
   $("#mpErr").textContent="";
+  setAvatarEls();
   openModal("m-myprof");
 }
+async function uploadAvatar(input){
+  const file=input.files&&input.files[0];if(!file)return;
+  if(file.size>8*1024*1024){$("#mpErr").textContent="Image too large (max 8 MB).";return;}
+  $("#mpErr").textContent="";toast("Uploading photo…");
+  try{
+    const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file);});
+    const S=256,c=document.createElement("canvas");c.width=S;c.height=S;
+    const x=c.getContext("2d");
+    const side=Math.min(img.width,img.height);
+    x.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,S,S);
+    const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.85));
+    const path=ME.id+".jpg";
+    const {error}=await sb.storage.from("avatars").upload(path,blob,{upsert:true,contentType:"image/jpeg"});
+    if(error)throw error;
+    const {data}=sb.storage.from("avatars").getPublicUrl(path);
+    const url=data.publicUrl;
+    const up=await sb.from("profiles").update({avatar_url:url}).eq("id",ME.id);
+    if(up.error)throw up.error;
+    ME.avatar_url=url;ME._avT=Math.floor(performance.now());
+    setAvatarEls();toast("Photo updated 📷");
+  }catch(e){$("#mpErr").textContent="Upload failed: "+(e.message||e);}
+  finally{input.value="";}
+}
 async function saveMyProfile(){
-  const name=$("#mpName").value.trim();
+  const name=$("#mpName").value.trim(),phone=$("#mpPhone").value.trim(),emp=$("#mpEmPhone").value.trim();
+  const L=dateLims(),dob=$("#mpDob").value;
   if(!vName(name)){$("#mpErr").textContent="Enter a valid name (letters only, 2–60 characters).";return;}
-  const {error}=await sb.from("profiles").update({full_name:name}).eq("id",ME.id);
+  if(phone&&!vPhone(phone)){$("#mpErr").textContent="Phone must be a valid 10-digit Indian mobile.";return;}
+  if(emp&&!vPhone(emp)){$("#mpErr").textContent="Emergency phone must be a valid 10-digit Indian mobile.";return;}
+  if(dob&&(dob<L.dobMin||dob>L.dobMax)){$("#mpErr").textContent="Date of birth looks wrong.";return;}
+  const patch={full_name:name,dob:dob||null,phone:phone||null,gender:$("#mpGender").value||null,
+    blood_group:$("#mpBlood").value||null,emergency_name:$("#mpEmName").value.trim()||null,
+    emergency_phone:emp||null,address:$("#mpAddress").value.trim()||null};
+  const {error}=await sb.from("profiles").update(patch).eq("id",ME.id);
   if(error){$("#mpErr").textContent="Could not save: "+error.message;return;}
-  ME.full_name=name;closeAll();
-  $("#whoName").textContent=name;$("#whoAv").textContent=ini(name);
+  Object.assign(ME,patch);closeAll();
+  $("#whoName").textContent=name;setAvatarEls();
   const h=new Date().getHours();
   $("#greet").textContent=(h<12?"Good morning":h<17?"Good afternoon":"Good evening")+", "+name.split(" ")[0];
   toast("Profile updated ✅");
