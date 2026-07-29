@@ -301,6 +301,12 @@ input,select,textarea{font:inherit;color:inherit}
           <button class="btn ghost" onclick="openModal('m-announce')">+ Announcement</button>
           <button class="btn" onclick="openModal('m-addemp')">+ Add Employee</button>
         </div>
+        <div class="tabs">
+          <button class="on" id="dt-std" onclick="dashTab('std')">Standard Dashboard</button>
+          <button id="dt-custom" onclick="dashTab('custom')">Custom Dashboard</button>
+          <button id="dt-config" onclick="dashTab('config')">Configuration</button>
+        </div>
+        <div id="dashStd">
         <div class="grid g4">
           <div class="card kpi"><div class="lbl">Employees</div><div class="val" id="kHead">0</div><div class="delta nil" id="kHeadSub">Add your first employee</div><div class="bar"><i id="kHeadBar" style="width:0%;background:var(--s1)"></i></div></div>
           <div class="card kpi"><div class="lbl">Present today</div><div class="val" id="kPresent">0</div><div class="delta nil" id="kPresentSub">Nobody clocked in yet</div><div class="bar"><i id="kPresentBar" style="width:0%;background:var(--s3)"></i></div></div>
@@ -314,6 +320,22 @@ input,select,textarea{font:inherit;color:inherit}
         <div class="grid g2 mt">
           <div class="card"><h3>Action needed</h3><div class="hint">Live across modules</div><div class="list" id="actionList"><div class="empty">✨ Nothing pending. All clear.</div></div></div>
           <div class="card"><h3>Latest announcements</h3><div class="hint">Company feed</div><div class="list" id="dashFeed"><div class="empty">📣 No announcements yet.</div></div></div>
+        </div>
+        </div><!-- /dashStd -->
+
+        <div id="dashCustom" style="display:none">
+          <div class="notice">🧩 <div><b>Your custom dashboard.</b> Pick which widgets appear here in the <b>Configuration</b> tab — the layout is saved to your account and follows you on any device.</div></div>
+          <div class="grid g2" id="customGrid"></div>
+        </div>
+
+        <div id="dashConfig" style="display:none">
+          <div class="card"><h3>Configure your custom dashboard</h3><div class="hint">Tick the widgets you want on the Custom Dashboard tab, then save</div>
+            <div class="list" id="cfgList"></div>
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <button class="btn" onclick="savePrefs()">Save configuration</button>
+              <button class="btn ghost" onclick="resetPrefs()">Reset to default</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -478,8 +500,60 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clea
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 
 /* ================= STATE ================= */
-let ME=null, EMP=[], LEAVES=[], EXP=[], ANN=[], ATT=[], USERS=[];
+let ME=null, EMP=[], LEAVES=[], EXP=[], ANN=[], ATT=[], USERS=[], PREFS=null;
 const todayISO=()=>new Date().toISOString().slice(0,10);
+
+/* ================= DASHBOARD TABS & WIDGETS ================= */
+const WIDGETS=[
+ {key:"kpi_emp",label:"KPI — Total employees",render:el=>{el.innerHTML=`<div class="card kpi"><div class="lbl">Employees</div><div class="val">${EMP.length}</div><div class="delta nil">${EMP.filter(e=>e.status==="Active").length} active · ${EMP.filter(e=>e.emp_type==="Intern").length} interns</div></div>`;}},
+ {key:"kpi_present",label:"KPI — Present today",render:el=>{el.innerHTML=`<div class="card kpi"><div class="lbl">Present today</div><div class="val">${ATT.length}</div><div class="delta nil">${ATT.filter(a=>a.clock_out).length} finished for the day</div></div>`;}},
+ {key:"kpi_pending",label:"KPI — Pending approvals",render:el=>{const n=LEAVES.filter(l=>l.status==="Pending").length+EXP.filter(x=>x.status==="Pending").length;el.innerHTML=`<div class="card kpi"><div class="lbl">Pending approvals</div><div class="val">${n}</div><div class="delta nil">Leaves &amp; expenses</div></div>`;}},
+ {key:"chart_dept",label:"Chart — Headcount by department",render:el=>{el.innerHTML=`<div class="card chart"><h3>Headcount by department</h3><div class="hint">Live</div><div class="cw"></div></div>`;const c=el.querySelector(".cw");
+   if(EMP.length){const by={};EMP.forEach(e=>by[e.dept||"Other"]=(by[e.dept||"Other"]||0)+1);hbar(c,Object.entries(by).map(([label,value])=>({label,value})).sort((a,b)=>b.value-a.value));}
+   else c.innerHTML='<div class="empty">No employees yet.</div>';}},
+ {key:"chart_att",label:"Chart — Attendance today",render:el=>{el.innerHTML=`<div class="card chart"><h3>Attendance today</h3><div class="hint">From clock-ins</div><div class="cw"></div></div>`;const c=el.querySelector(".cw");
+   const present=ATT.length,out=ATT.filter(x=>x.clock_out).length;
+   if(present)donut(c,[{label:"Clocked in",value:present-out,color:css("--s1")},{label:"Done",value:out,color:css("--s3")},{label:"Not in",value:Math.max(0,EMP.length-present),color:css("--grid")}],[present+(EMP.length?"/"+EMP.length:""),"present"]);
+   else c.innerHTML='<div class="empty">Nobody clocked in today.</div>';}},
+ {key:"list_actions",label:"List — Action needed",render:el=>{el.innerHTML=`<div class="card"><h3>Action needed</h3><div class="hint">Live across modules</div><div class="list cw"></div></div>`;el.querySelector(".cw").innerHTML=$("#actionList").innerHTML;}},
+ {key:"list_ann",label:"List — Latest announcements",render:el=>{el.innerHTML=`<div class="card"><h3>Latest announcements</h3><div class="hint">Company feed</div><div class="list cw"></div></div>`;el.querySelector(".cw").innerHTML=$("#dashFeed").innerHTML;}},
+ {key:"my_leaves",label:"Personal — My leave requests",render:el=>{const mine=LEAVES.filter(l=>l.requester===ME.email).slice(0,5);
+   el.innerHTML=`<div class="card"><h3>My leave requests</h3><div class="hint">Latest 5</div><div class="list cw"></div></div>`;
+   el.querySelector(".cw").innerHTML=mine.map(l=>`<div class="li"><span>🌴</span><div style="flex:1"><b style="font-size:12.5px">${esc(l.type)}</b><br><span style="font-size:11px;color:var(--muted)">${l.from_date} → ${l.to_date}</span></div>${statusPill(l.status)}</div>`).join("")||'<div class="empty">No leave requests yet.</div>';}},
+ {key:"my_claims",label:"Personal — My expense claims",render:el=>{const mine=EXP.filter(x=>x.requester===ME.email).slice(0,5);
+   el.innerHTML=`<div class="card"><h3>My expense claims</h3><div class="hint">Latest 5</div><div class="list cw"></div></div>`;
+   el.querySelector(".cw").innerHTML=mine.map(x=>`<div class="li"><span>🧾</span><div style="flex:1"><b style="font-size:12.5px">${esc(x.description)}</b><br><span style="font-size:11px;color:var(--muted)">${fmt(x.amount)}</span></div>${statusPill(x.status)}</div>`).join("")||'<div class="empty">No claims yet.</div>';}}
+];
+const DEFAULT_WIDGETS=["kpi_emp","kpi_present","chart_dept","list_actions"];
+function dashTab(t){
+  ["std","custom","config"].forEach(k=>{
+    $("#dt-"+k).classList.toggle("on",k===t);
+    $("#dash"+(k==="std"?"Std":k==="custom"?"Custom":"Config")).style.display=k===t?"":"none";
+  });
+  if(t==="custom")renderCustom();
+  if(t==="config")renderConfig();
+}
+function myWidgets(){return (PREFS&&Array.isArray(PREFS.widgets)&&PREFS.widgets.length?PREFS.widgets:DEFAULT_WIDGETS).filter(k=>WIDGETS.some(w=>w.key===k));}
+function renderCustom(){
+  const grid=$("#customGrid");grid.innerHTML="";
+  const keys=myWidgets();
+  if(!keys.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">🧩 No widgets selected. Open Configuration to pick some.</div>';return;}
+  keys.forEach(k=>{const w=WIDGETS.find(x=>x.key===k);const cell=document.createElement("div");grid.appendChild(cell);w.render(cell);});
+}
+function renderConfig(){
+  const cur=myWidgets();
+  $("#cfgList").innerHTML=WIDGETS.map(w=>`<label class="li" style="cursor:pointer;gap:12px"><input type="checkbox" data-wk="${w.key}" ${cur.includes(w.key)?"checked":""} style="width:16px;height:16px;accent-color:var(--s1)"> <span style="font-size:13px">${w.label}</span></label>`).join("");
+}
+async function savePrefs(){
+  const keys=[...$$("#cfgList input:checked")].map(i=>i.dataset.wk);
+  const {error}=await sb.from("dashboard_prefs").upsert({id:ME.id,widgets:keys,updated_at:new Date().toISOString()});
+  if(error){toast("Could not save: "+error.message);return;}
+  PREFS={widgets:keys};toast("Configuration saved ✅");dashTab("custom");
+}
+async function resetPrefs(){
+  await sb.from("dashboard_prefs").upsert({id:ME.id,widgets:DEFAULT_WIDGETS,updated_at:new Date().toISOString()});
+  PREFS={widgets:DEFAULT_WIDGETS};renderConfig();toast("Reset to default");
+}
 
 /* ================= AUTH ================= */
 let mode="in";
@@ -556,7 +630,9 @@ async function loadAll(manual){
   ]);
   EMP=emp.data||[];LEAVES=lv.data||[];EXP=ex.data||[];ANN=an.data||[];ATT=at.data||[];
   if(ME.role==="admin"){const u=await sb.from("profiles").select("*").order("created_at",{ascending:false});USERS=u.data||[];}
+  try{const pr=await sb.from("dashboard_prefs").select("widgets").eq("id",ME.id).maybeSingle();if(pr.data)PREFS=pr.data;}catch(e){}
   renderAll();
+  if($("#dashCustom").style.display!=="none")renderCustom();
   if(manual)toast("Refreshed from database");
 }
 function renderAll(){renderKPIs();renderCharts();renderEmp();renderInbox();renderLeaves();renderAtt();renderExp();renderFeed();renderAdmin();renderReports();renderActions();}
