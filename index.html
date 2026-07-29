@@ -191,6 +191,29 @@ input,select,textarea{font:inherit;color:inherit}
 .stat b{font-size:17px;display:block;font-family:var(--display);font-weight:700}
 .stat span{font-size:11px;color:var(--muted)}
 .empty{padding:38px 16px;text-align:center;color:var(--muted);font-size:13px;line-height:1.55}
+/* inbox */
+.chips{display:flex;gap:6px;align-items:center}
+.chip{font-size:12px;font-weight:600;border:1px solid var(--ring);border-radius:99px;padding:6px 13px;color:var(--ink2);background:var(--card);box-shadow:var(--shadow);transition:all .14s}
+.chip:hover{border-color:var(--brand1);color:var(--brand1)}
+.chip.on{background:linear-gradient(135deg,var(--brand1),#2f66d8);color:#fff;border-color:transparent;box-shadow:0 5px 14px -4px rgba(59,123,240,.5)}
+.ibx{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
+@media(max-width:1100px){.ibx{grid-template-columns:1fr}}
+.ibx-list{padding:8px;max-height:calc(100vh - 280px);overflow-y:auto}
+.ibx-item{display:flex;gap:11px;align-items:flex-start;padding:12px;border-radius:12px;cursor:pointer;transition:background .13s;border:1.5px solid transparent}
+.ibx-item:hover{background:var(--plane)}
+.ibx-item.sel{background:color-mix(in srgb,var(--brand1) 7%,transparent);border-color:color-mix(in srgb,var(--brand1) 35%,transparent)}
+.ibx-item .t{font-size:13px;font-weight:600}
+.ibx-item .s{font-size:11.5px;color:var(--muted);margin-top:2px}
+.ibx-item .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ic.leave{background:rgba(27,175,122,.13)}
+.ic.expense{background:rgba(237,161,0,.13)}
+.ic.access{background:rgba(74,58,167,.13)}
+.ic.update{background:rgba(59,123,240,.12)}
+.ibx-detail{min-height:320px;padding:22px}
+.dt-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--grid);font-size:13px}
+.dt-row:last-of-type{border-bottom:none}
+.dt-row span:first-child{color:var(--muted);font-size:12px}
+.dt-row span:last-child{font-weight:600;text-align:right}
 </style>
 </head>
 <body>
@@ -244,7 +267,7 @@ input,select,textarea{font:inherit;color:inherit}
     <nav class="nav" id="nav">
       <div class="grp">Workspace</div>
       <button class="nitem active" data-view="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
-      <button class="nitem" data-view="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.9A2 2 0 0016.7 4H7.3a2 2 0 00-1.8 1.1z"/></svg>Approvals <span class="pill bad" id="inboxCount" style="margin-left:auto;display:none">0</span></button>
+      <button class="nitem" data-view="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.9A2 2 0 0016.7 4H7.3a2 2 0 00-1.8 1.1z"/></svg>Inbox <span class="pill bad" id="inboxCount" style="margin-left:auto;display:none">0</span></button>
       <div class="grp">Modules</div>
       <button class="nitem" data-view="corehr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Employees</button>
       <button class="nitem" data-view="att"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Attendance &amp; Leave</button>
@@ -323,11 +346,30 @@ input,select,textarea{font:inherit;color:inherit}
         </div>
       </section>
 
-      <!-- APPROVALS INBOX -->
+      <!-- INBOX -->
       <section class="view" id="v-inbox">
-        <div class="ph"><div><h1>Approvals</h1><div class="sub">Leave requests and expense claims waiting for a decision</div></div></div>
-        <div class="card" style="padding:6px 16px">
-          <table class="tbl"><thead><tr><th>Type</th><th>Requested by</th><th>Details</th><th>When</th><th style="text-align:right">Action</th></tr></thead><tbody id="inboxRows"></tbody></table>
+        <div class="ph"><div><h1>Inbox</h1><div class="sub" id="ibxSub">Requests, approvals and updates — all in one place</div></div>
+          <div class="sp"></div><button class="btn ghost sm" onclick="loadAll(true)">↻ Refresh</button></div>
+        <div class="tabs" id="ibxTabs">
+          <button id="it-act" onclick="ibxTab('act')">Action needed <span class="pill bad" id="ibxActN" style="margin-left:6px;display:none">0</span></button>
+          <button id="it-mine" onclick="ibxTab('mine')">My requests</button>
+          <button id="it-upd" onclick="ibxTab('upd')">Updates</button>
+        </div>
+        <div class="filters" id="ibxFilters">
+          <div class="chips" id="ibxStatusChips">
+            <button class="chip on" data-st="">All</button>
+            <button class="chip" data-st="Pending">Pending</button>
+            <button class="chip" data-st="Approved">Approved</button>
+            <button class="chip" data-st="Rejected">Rejected</button>
+          </div>
+          <select id="ibxType" onchange="renderInbox()">
+            <option value="">All types</option><option value="leave">Leave</option><option value="expense">Expense</option><option value="access">Access request</option>
+          </select>
+          <input type="text" id="ibxSearch" placeholder="Search by name…" style="width:200px" oninput="renderInbox()">
+        </div>
+        <div class="ibx">
+          <div class="ibx-list card" id="ibxList"></div>
+          <div class="ibx-detail card" id="ibxDetail"></div>
         </div>
       </section>
 
@@ -736,19 +778,104 @@ function renderEmp(){
     <td style="text-align:right"><span style="color:var(--s1);font-size:12px;font-weight:600">Open →</span></td></tr>`).join("")
     ||'<tr><td colspan="7"><div class="empty">👥 The register is empty. Add your first employee to bring the dashboard to life.</div></td></tr>';
 }
+/* ================= INBOX ================= */
+let IBX={tab:null,status:"",sel:null};
+const canApprove=()=>ME&&(ME.role==="admin"||ME.role==="hr");
+const relTime=w=>{const d=(Date.now()-new Date(w))/36e5;return d<1?"just now":d<24?Math.floor(d)+"h ago":Math.floor(d/24)+"d ago";};
+function ibxItems(){
+  const mkL=l=>({kind:"leave",icon:"🌴",id:l.id,who:l.requester,title:esc(l.type),
+    sub:`${l.from_date} → ${l.to_date} · ${l.days} day${l.days>1?"s":""}`,status:l.status,when:l.created_at,raw:l});
+  const mkX=x=>({kind:"expense",icon:"🧾",id:x.id,who:x.requester,title:`${esc(x.category)} · ${fmt(x.amount)}`,
+    sub:esc(x.description),status:x.status,when:x.created_at,raw:x});
+  const mkU=u=>({kind:"access",icon:"🔐",id:u.id,who:u.email,title:"Access request",
+    sub:esc(u.full_name||nice(u.email)),status:u.status==="pending"?"Pending":u.status==="approved"?"Approved":"Rejected",when:u.created_at,raw:u});
+  return {mkL,mkX,mkU};
+}
+function ibxTab(t){IBX.tab=t;IBX.sel=null;renderInbox();}
+$$("#ibxStatusChips .chip").forEach(c=>c.onclick=()=>{$$("#ibxStatusChips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");IBX.status=c.dataset.st;IBX.sel=null;renderInbox();});
 function renderInbox(){
-  const items=[
-    ...LEAVES.filter(l=>l.status==="Pending").map(l=>({kind:"leave",id:l.id,who:l.requester,d:`${esc(l.type)} · ${l.from_date} → ${l.to_date} (${l.days} day${l.days>1?"s":""})${l.reason?" · "+esc(l.reason):""}`,when:l.created_at})),
-    ...EXP.filter(x=>x.status==="Pending").map(x=>({kind:"expense",id:x.id,who:x.requester,d:`${esc(x.category)} · ${esc(x.description)} · <b>${fmt(x.amount)}</b>`,when:x.created_at}))
-  ].sort((a,b)=>a.when<b.when?1:-1);
-  const canAct=ME.role==="admin"||ME.role==="hr";
-  $("#inboxRows").innerHTML=items.map(r=>`<tr>
-    <td><span class="pill info">${r.kind==="leave"?"Leave":"Expense"}</span></td>
-    <td><div class="emp">${av(nice(r.who))}<b>${esc(nice(r.who))}</b></div></td>
-    <td style="max-width:300px">${r.d}</td>
-    <td>${new Date(r.when).toLocaleDateString("en-IN",{day:"numeric",month:"short"})}</td>
-    <td style="text-align:right;white-space:nowrap">${canAct?`<button class="btn sm good" onclick="decide('${r.kind}','${r.id}',1)">Approve</button> <button class="btn sm ghost" onclick="decide('${r.kind}','${r.id}',0)">Reject</button>`:'<span class="pill gray">Awaiting admin</span>'}</td></tr>`).join("")
-    ||'<tr><td colspan="5"><div class="empty">🎉 Nothing waiting for approval.</div></td></tr>';
+  if(!ME)return;
+  if(IBX.tab===null)IBX.tab=canApprove()?"act":"mine";
+  $("#it-act").style.display=canApprove()?"":"none";
+  ["act","mine","upd"].forEach(k=>$("#it-"+({act:"act",mine:"mine",upd:"upd"})[k]).classList.toggle("on",IBX.tab===k));
+  const {mkL,mkX,mkU}=ibxItems();
+  let items=[];
+  if(IBX.tab==="act"&&canApprove()){
+    items=[...LEAVES.map(mkL),...EXP.map(mkX)];
+    if(ME.role==="admin")items.push(...USERS.filter(u=>u.id!==ME.id).map(mkU));
+  }else if(IBX.tab==="mine"){
+    items=[...LEAVES.filter(l=>l.requester===ME.email).map(mkL),...EXP.filter(x=>x.requester===ME.email).map(mkX)];
+  }else{
+    items=[
+      ...LEAVES.filter(l=>l.requester===ME.email&&l.status!=="Pending").map(l=>({...mkL(l),icon:l.status==="Approved"?"✅":"❌",title:`Your ${esc(l.type)} was ${l.status.toLowerCase()}`,kind:"update"})),
+      ...EXP.filter(x=>x.requester===ME.email&&x.status!=="Pending").map(x=>({...mkX(x),icon:x.status==="Approved"?"✅":"❌",title:`Your claim (${fmt(x.amount)}) was ${x.status.toLowerCase()}`,kind:"update"})),
+      ...ANN.slice(0,6).map(a=>({kind:"update",icon:"📣",id:"ann-"+a.id,who:a.author,title:esc(a.title),sub:esc((a.body||"").slice(0,60)),status:"",when:a.created_at,raw:a}))
+    ];
+  }
+  const q=($("#ibxSearch")?.value||"").toLowerCase(),ty=$("#ibxType")?.value||"";
+  const showFilters=IBX.tab!=="upd";
+  $("#ibxFilters").style.display=showFilters?"":"none";
+  if(showFilters){
+    if(IBX.status)items=items.filter(i=>i.status===IBX.status);
+    if(ty)items=items.filter(i=>i.kind===ty);
+    if(q)items=items.filter(i=>(nice(i.who)+i.title+i.sub).toLowerCase().includes(q));
+  }
+  items.sort((a,b)=>a.when<b.when?1:-1);
+  const pend=items.filter(i=>i.status==="Pending").length;
+  const actN=canApprove()?[...LEAVES,...EXP].filter(i=>i.status==="Pending").length+(ME.role==="admin"?USERS.filter(u=>u.status==="pending").length:0):0;
+  $("#ibxActN").textContent=actN;$("#ibxActN").style.display=actN?"":"none";
+  $("#ibxSub").textContent=IBX.tab==="act"?`${pend} request${pend===1?"":"s"} waiting for a decision`:IBX.tab==="mine"?"Everything you've requested, with live status":"Decisions on your requests and company news";
+  if(!items.find(i=>i.kind+i.id===IBX.sel))IBX.sel=null;
+  $("#ibxList").innerHTML=items.map(i=>`
+    <div class="ibx-item ${IBX.sel===i.kind+i.id?"sel":""}" onclick="ibxSelect('${i.kind}','${i.id}')">
+      <div class="ic ${i.kind==="update"?"update":i.kind}">${i.icon}</div>
+      <div style="flex:1;min-width:0"><div class="t">${i.title}</div>
+        <div class="s">${IBX.tab==="act"?esc(nice(i.who))+" · ":""}${i.sub}</div>
+        <div class="s">${relTime(i.when)}</div></div>
+      ${i.status?statusPill(i.status):""}
+    </div>`).join("")||`<div class="empty">${IBX.tab==="act"?"🎉 Inbox zero — nothing needs your decision.":IBX.tab==="mine"?"📭 You haven't raised any requests yet.":"🔔 No updates yet."}</div>`;
+  renderIbxDetail(items);
+}
+function ibxSelect(kind,id){IBX.sel=kind+id;renderInbox();}
+function renderIbxDetail(items){
+  const d=$("#ibxDetail");
+  const it=items.find(i=>i.kind+i.id===IBX.sel);
+  if(!it){d.innerHTML='<div class="empty" style="padding-top:90px">📩 Select an item from the list<br>to see its full details here.</div>';return;}
+  const r=it.raw;
+  let rows="",actions="";
+  if(it.kind==="leave"){
+    rows=`<div class="dt-row"><span>Requested by</span><span>${esc(nice(it.who))}</span></div>
+      <div class="dt-row"><span>Leave type</span><span>${esc(r.type)}</span></div>
+      <div class="dt-row"><span>Dates</span><span>${r.from_date} → ${r.to_date}</span></div>
+      <div class="dt-row"><span>Working days</span><span>${r.days}</span></div>
+      ${r.reason?`<div class="dt-row"><span>Reason</span><span>${esc(r.reason)}</span></div>`:""}
+      <div class="dt-row"><span>Raised</span><span>${new Date(r.created_at).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span></div>`;
+    if(r.status==="Pending"&&canApprove())actions=`<button class="btn good" onclick="decide('leave','${r.id}',1)">✓ Approve</button><button class="btn bad" onclick="decide('leave','${r.id}',0)">✕ Reject</button>`;
+  }else if(it.kind==="expense"){
+    rows=`<div class="dt-row"><span>Requested by</span><span>${esc(nice(it.who))}</span></div>
+      <div class="dt-row"><span>Category</span><span>${esc(r.category)}</span></div>
+      <div class="dt-row"><span>Description</span><span>${esc(r.description)}</span></div>
+      <div class="dt-row"><span>Amount</span><span>${fmt(r.amount)}</span></div>
+      <div class="dt-row"><span>Raised</span><span>${new Date(r.created_at).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span></div>`;
+    if(r.status==="Pending"&&canApprove())actions=`<button class="btn good" onclick="decide('expense','${r.id}',1)">✓ Approve</button><button class="btn bad" onclick="decide('expense','${r.id}',0)">✕ Reject</button>`;
+  }else if(it.kind==="access"){
+    rows=`<div class="dt-row"><span>Name</span><span>${esc(r.full_name||nice(r.email))}</span></div>
+      <div class="dt-row"><span>Email</span><span>${esc(r.email)}</span></div>
+      <div class="dt-row"><span>Role</span><span>${esc(r.role)}</span></div>
+      <div class="dt-row"><span>Requested</span><span>${new Date(r.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"short"})}</span></div>`;
+    if(r.status==="pending"&&ME.role==="admin")actions=`<button class="btn good" onclick="setUser('${r.id}',{status:'approved'},'Access approved')">✓ Approve access</button><button class="btn bad" onclick="setUser('${r.id}',{status:'declined'},'Access declined')">✕ Decline</button>`;
+  }else{
+    rows=`<div class="dt-row"><span>From</span><span>${esc(nice(it.who))}</span></div>
+      <div class="dt-row"><span>When</span><span>${new Date(it.when).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span></div>`;
+    if(r.body)rows+=`<p style="font-size:13px;line-height:1.6;margin-top:12px;color:var(--ink2)">${esc(r.body)}</p>`;
+  }
+  d.innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+    <div class="ic ${it.kind==="update"?"update":it.kind}" style="width:42px;height:42px;font-size:19px">${it.icon}</div>
+    <div><div style="font-size:15px;font-weight:700;font-family:var(--display)">${it.title}</div>
+    <div style="font-size:12px;color:var(--muted)">${it.status?it.status+" · ":""}${relTime(it.when)}</div></div>
+    ${it.status?`<div style="margin-left:auto">${statusPill(it.status)}</div>`:""}</div>
+    ${rows}
+    ${actions?`<div style="display:flex;gap:10px;margin-top:18px">${actions}</div>`:""}`;
 }
 function renderLeaves(){
   $("#aLp").textContent=LEAVES.filter(l=>l.status==="Pending").length;
