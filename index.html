@@ -284,8 +284,8 @@ input,select,textarea{font:inherit;color:inherit}
       <button class="iconbtn" onclick="toggleTheme()" title="Dark / light mode">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       </button>
-      <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
-      <div class="avatar" id="whoAv">–</div>
+      <div class="who" onclick="openMyProfile()" style="cursor:pointer" title="My profile"><b id="whoName">—</b><span id="whoRole">—</span></div>
+      <div class="avatar" id="whoAv" onclick="openMyProfile()" style="cursor:pointer" title="My profile">–</div>
       <button class="iconbtn" onclick="doSignOut()" title="Sign out">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
       </button>
@@ -429,13 +429,33 @@ input,select,textarea{font:inherit;color:inherit}
 <div class="modal" id="m-addemp"><div class="mbox">
   <div class="mh"><b>Add employee</b><button class="x" onclick="closeAll()">✕</button></div>
   <div class="mb">
-    <div class="fld"><label>Full name *</label><input id="neName" placeholder="Name"></div>
-    <div class="fld"><label>Department *</label><select id="neDept"></select></div>
-    <div class="fld"><label>Designation</label><input id="neDesig" placeholder="e.g. SEO Executive"></div>
-    <div class="fld"><label>Employment type</label><select id="neType"><option>Full-time</option><option>Intern</option><option>Contract</option></select></div>
-    <div class="fld"><label>Joining date</label><input type="date" id="neJoin"></div>
+    <div class="fld"><label>Full name *</label><input id="neName" placeholder="Name" maxlength="60"></div>
+    <div class="subgrid">
+      <div class="fld"><label>Department *</label><select id="neDept"></select></div>
+      <div class="fld"><label>Designation</label><input id="neDesig" placeholder="e.g. SEO Executive" maxlength="60"></div>
+      <div class="fld"><label>Employment type</label><select id="neType"><option>Full-time</option><option>Intern</option><option>Contract</option></select></div>
+      <div class="fld"><label>Joining date *</label><input type="date" id="neJoin"></div>
+      <div class="fld"><label>Work email</label><input type="email" id="neEmail" placeholder="name@offshoremarketers.com" maxlength="80"></div>
+      <div class="fld"><label>Phone</label><input id="nePhone" placeholder="10-digit mobile" maxlength="10" inputmode="numeric"></div>
+      <div class="fld"><label>Date of birth</label><input type="date" id="neDob"></div>
+      <div class="fld"><label>Gender</label><select id="neGender"><option value="">—</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+    </div>
+    <p id="neErr" style="color:var(--crit);font-size:12px;min-height:15px;margin-top:4px"></p>
   </div>
   <div class="mf"><button class="btn ghost" onclick="closeAll()">Cancel</button><button class="btn" onclick="addEmployee()">Add to register</button></div>
+</div></div>
+
+<div class="drawer" id="empDrawer"><div class="dh" id="empDrawerHead"></div><div class="db" id="empDrawerBody"></div></div>
+
+<div class="modal" id="m-myprof"><div class="mbox">
+  <div class="mh"><b>My profile</b><button class="x" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <div class="fld"><label>Full name *</label><input id="mpName" maxlength="60"></div>
+    <div class="fld"><label>Work email</label><input id="mpEmail" disabled style="opacity:.65"></div>
+    <div class="fld"><label>Role</label><input id="mpRole" disabled style="opacity:.65"></div>
+    <p id="mpErr" style="color:var(--crit);font-size:12px;min-height:15px"></p>
+  </div>
+  <div class="mf"><button class="btn ghost" onclick="closeAll()">Cancel</button><button class="btn" onclick="saveMyProfile()">Save changes</button></div>
 </div></div>
 
 <div class="modal" id="m-leave"><div class="mbox">
@@ -703,11 +723,11 @@ function renderEmp(){
   $("#empSub").textContent=EMP.length+" on the register";
   const q=($("#empSearch").value||"").toLowerCase(),df=$("#empDept").value;
   const rows=EMP.filter(e=>(!q||(e.name+e.designation).toLowerCase().includes(q))&&(!df||e.dept===df));
-  $("#empRows").innerHTML=rows.map((e,i)=>`<tr>
-    <td><div class="emp">${av(e.name,i)}<div><b>${esc(e.name)}</b></div></div></td>
+  $("#empRows").innerHTML=rows.map((e,i)=>`<tr class="click" onclick="openEmp('${e.id}')">
+    <td><div class="emp">${av(e.name,i)}<div><b>${esc(e.name)}</b>${e.email?`<span>${esc(e.email)}</span>`:""}</div></div></td>
     <td>${esc(e.dept||"—")}</td><td>${esc(e.designation||"—")}</td><td>${esc(e.emp_type)}</td>
     <td>${statusPill(e.status)}</td><td>${e.joined||"—"}</td>
-    <td style="text-align:right">${ME.role==="admin"?`<button class="btn sm ghost" onclick="delEmployee('${e.id}','${esc(e.name)}')">Remove</button>`:""}</td></tr>`).join("")
+    <td style="text-align:right"><span style="color:var(--s1);font-size:12px;font-weight:600">Open →</span></td></tr>`).join("")
     ||'<tr><td colspan="7"><div class="empty">👥 The register is empty. Add your first employee to bring the dashboard to life.</div></td></tr>';
 }
 function renderInbox(){
@@ -792,13 +812,110 @@ function renderReports(){
   $("#reportGrid").innerHTML=R.filter(r=>r[2]!=="users"||ME.role==="admin").map(r=>`<div class="report"><b>${r[0]}</b><p>${r[1]}</p><button class="btn ghost sm" onclick="exportCSV('${r[2]}')">⬇ Download CSV</button></div>`).join("");
 }
 
+/* ================= VALIDATION ================= */
+const vName=s=>/^[A-Za-z][A-Za-z .'-]{1,59}$/.test(s.trim());
+const vCompanyEmail=s=>/^[a-z0-9._%+-]+@(offshoremarketers|offshorehrsolutions)\.(com|in)$/i.test(s.trim());
+const vPhone=s=>/^[6-9]\d{9}$/.test(s.trim());
+function dateLims(){
+  const t=new Date();
+  const iso=d=>d.toISOString().slice(0,10);
+  const plus1y=new Date(t);plus1y.setFullYear(t.getFullYear()+1);
+  const dobMax=new Date(t);dobMax.setFullYear(t.getFullYear()-16);
+  return {joinMin:"2000-01-01",joinMax:iso(plus1y),dobMin:"1950-01-01",dobMax:iso(dobMax)};
+}
+function applyDateLimits(){
+  const L=dateLims();
+  const set=(id,min,max)=>{const el=$(id);if(el){el.min=min;el.max=max;}};
+  set("#neJoin",L.joinMin,L.joinMax);
+  set("#neDob",L.dobMin,L.dobMax);
+  set("#lvFrom","2020-01-01",L.joinMax);
+  set("#lvTo","2020-01-01",L.joinMax);
+}
+function checkEmpForm(f){
+  const L=dateLims();
+  if(!f.name||!vName(f.name))return "Enter a valid name (letters only, 2–60 characters).";
+  if(!f.joined)return "Joining date is required.";
+  if(f.joined<L.joinMin||f.joined>L.joinMax)return "Joining date must be between 2000 and one year from today.";
+  if(f.email&&!vCompanyEmail(f.email))return "Work email must be @offshoremarketers or @offshorehrsolutions (.com/.in).";
+  if(f.phone&&!vPhone(f.phone))return "Phone must be a valid 10-digit Indian mobile number.";
+  if(f.dob&&(f.dob<L.dobMin||f.dob>L.dobMax))return "Date of birth looks wrong — employee must be at least 16.";
+  if(f.dob&&f.joined&&f.dob>=f.joined)return "Date of birth cannot be after the joining date.";
+  return null;
+}
+
 /* ================= ACTIONS ================= */
 async function addEmployee(){
-  const name=$("#neName").value.trim();if(!name){toast("Please enter a name");return;}
-  const {error}=await sb.from("employees").insert({name,dept:$("#neDept").value,designation:$("#neDesig").value.trim(),emp_type:$("#neType").value,joined:$("#neJoin").value||todayISO()});
-  if(error){toast("Could not add: "+error.message);return;}
-  closeAll();$("#neName").value="";$("#neDesig").value="";
-  await loadAll();toast(name+" added to the register ✅");
+  const f={name:$("#neName").value.trim(),dept:$("#neDept").value,designation:$("#neDesig").value.trim(),
+    emp_type:$("#neType").value,joined:$("#neJoin").value,email:$("#neEmail").value.trim().toLowerCase(),
+    phone:$("#nePhone").value.trim(),dob:$("#neDob").value,gender:$("#neGender").value};
+  const err=checkEmpForm(f);
+  if(err){$("#neErr").textContent=err;return;}
+  $("#neErr").textContent="";
+  const {error}=await sb.from("employees").insert({name:f.name,dept:f.dept,designation:f.designation||null,
+    emp_type:f.emp_type,joined:f.joined,email:f.email||null,phone:f.phone||null,dob:f.dob||null,gender:f.gender||null});
+  if(error){$("#neErr").textContent="Could not add: "+error.message;return;}
+  closeAll();["neName","neDesig","neEmail","nePhone","neDob","neJoin"].forEach(i=>$("#"+i).value="");
+  await loadAll();toast(f.name+" added to the register ✅");
+}
+/* ---- employee profile drawer ---- */
+let drawerEmpId=null;
+function openEmp(id){
+  const e=EMP.find(x=>x.id===id);if(!e)return;
+  drawerEmpId=id;
+  const canEdit=ME.role==="admin"||ME.role==="hr";
+  const L=dateLims();
+  const dis=canEdit?"":"disabled style='opacity:.65'";
+  $("#empDrawerHead").innerHTML=`<div class="emp">${av(e.name)}<div><b style="font-size:15px">${esc(e.name)}</b><span>${esc(e.designation||"—")} · ${esc(e.dept||"—")}</span></div></div><button class="x" onclick="closeAll()">✕</button>`;
+  $("#empDrawerBody").innerHTML=`
+    <div class="fld"><label>Full name *</label><input id="edName" value="${esc(e.name)}" maxlength="60" ${dis}></div>
+    <div class="subgrid">
+      <div class="fld"><label>Department</label><select id="edDept" ${dis}>${DEPTS.map(d=>`<option ${d===e.dept?"selected":""}>${d}</option>`).join("")}</select></div>
+      <div class="fld"><label>Designation</label><input id="edDesig" value="${esc(e.designation||"")}" maxlength="60" ${dis}></div>
+      <div class="fld"><label>Type</label><select id="edType" ${dis}>${["Full-time","Intern","Contract"].map(t=>`<option ${t===e.emp_type?"selected":""}>${t}</option>`).join("")}</select></div>
+      <div class="fld"><label>Status</label><select id="edStatus" ${dis}>${["Active","Probation","Notice Period","Exited"].map(s=>`<option ${s===e.status?"selected":""}>${s}</option>`).join("")}</select></div>
+      <div class="fld"><label>Joining date *</label><input type="date" id="edJoin" value="${e.joined||""}" min="${L.joinMin}" max="${L.joinMax}" ${dis}></div>
+      <div class="fld"><label>Date of birth</label><input type="date" id="edDob" value="${e.dob||""}" min="${L.dobMin}" max="${L.dobMax}" ${dis}></div>
+      <div class="fld"><label>Work email</label><input id="edEmail" value="${esc(e.email||"")}" maxlength="80" placeholder="name@offshoremarketers.com" ${dis}></div>
+      <div class="fld"><label>Phone</label><input id="edPhone" value="${esc(e.phone||"")}" maxlength="10" inputmode="numeric" ${dis}></div>
+      <div class="fld"><label>Gender</label><select id="edGender" ${dis}>${["","Male","Female","Other"].map(g=>`<option value="${g}" ${g===(e.gender||"")?"selected":""}>${g||"—"}</option>`).join("")}</select></div>
+      <div class="fld"><label>Employee code</label><input id="edCode" value="${esc(e.emp_code||"")}" maxlength="20" ${dis}></div>
+    </div>
+    <p id="edErr" style="color:var(--crit);font-size:12px;min-height:15px"></p>
+    ${canEdit?`<div style="display:flex;gap:8px"><button class="btn" onclick="saveEmp()">Save changes</button>
+      ${ME.role==="admin"?`<button class="btn ghost" onclick="delEmployee('${e.id}','${esc(e.name)}')">Remove</button>`:""}</div>`
+      :'<p style="font-size:12px;color:var(--muted)">Only HR or Admin can edit employee profiles.</p>'}`;
+  $("#overlay").classList.add("on");$("#empDrawer").classList.add("on");
+}
+async function saveEmp(){
+  const f={name:$("#edName").value.trim(),dept:$("#edDept").value,designation:$("#edDesig").value.trim(),
+    emp_type:$("#edType").value,joined:$("#edJoin").value,email:$("#edEmail").value.trim().toLowerCase(),
+    phone:$("#edPhone").value.trim(),dob:$("#edDob").value,gender:$("#edGender").value};
+  const err=checkEmpForm(f);
+  if(err){$("#edErr").textContent=err;return;}
+  const {error}=await sb.from("employees").update({name:f.name,dept:f.dept,designation:f.designation||null,
+    emp_type:f.emp_type,status:$("#edStatus").value,joined:f.joined,email:f.email||null,phone:f.phone||null,
+    dob:f.dob||null,gender:f.gender||null,emp_code:$("#edCode").value.trim()||null}).eq("id",drawerEmpId);
+  if(error){$("#edErr").textContent="Could not save: "+error.message;return;}
+  closeAll();await loadAll();toast("Profile updated ✅");
+}
+/* ---- my profile ---- */
+function openMyProfile(){
+  $("#mpName").value=ME.full_name||"";
+  $("#mpEmail").value=ME.email;
+  $("#mpRole").value=ME.role==="admin"?"Admin":ME.role==="hr"?"HR":"Employee";
+  $("#mpErr").textContent="";
+  openModal("m-myprof");
+}
+async function saveMyProfile(){
+  const name=$("#mpName").value.trim();
+  if(!vName(name)){$("#mpErr").textContent="Enter a valid name (letters only, 2–60 characters).";return;}
+  const {error}=await sb.from("profiles").update({full_name:name}).eq("id",ME.id);
+  if(error){$("#mpErr").textContent="Could not save: "+error.message;return;}
+  ME.full_name=name;closeAll();
+  $("#whoName").textContent=name;$("#whoAv").textContent=ini(name);
+  const h=new Date().getHours();
+  $("#greet").textContent=(h<12?"Good morning":h<17?"Good afternoon":"Good evening")+", "+name.split(" ")[0];
+  toast("Profile updated ✅");
 }
 async function delEmployee(id,name){
   if(!confirm("Remove "+name+" from the register?"))return;
@@ -807,15 +924,19 @@ async function delEmployee(id,name){
   await loadAll();toast(name+" removed");
 }
 async function applyLeave(){
-  const f=$("#lvFrom").value,t=$("#lvTo").value;if(!f||!t){toast("Pick the dates");return;}
+  const f=$("#lvFrom").value,t=$("#lvTo").value;
+  if(!f||!t){toast("Pick both dates");return;}
+  if(t<f){toast("'To' date cannot be before 'From' date");return;}
   const days=Math.max(1,Math.round((new Date(t)-new Date(f))/864e5)+1);
+  if(days>60){toast("Leave cannot exceed 60 days — talk to HR for longer breaks");return;}
   const {error}=await sb.from("leaves").insert({requester:ME.email,type:$("#lvType").value,from_date:f,to_date:t,days,reason:$("#lvWhy").value.trim()});
   if(error){toast("Could not submit: "+error.message);return;}
   closeAll();await loadAll();toast("Leave request submitted — pending approval");
 }
 async function addExpense(){
   const d=$("#exDesc").value.trim(),amt=Number($("#exAmt").value);
-  if(!d||!amt){toast("Description and amount required");return;}
+  if(!d||d.length<3){toast("Please describe the expense (min 3 characters)");return;}
+  if(!amt||amt<1||amt>1000000||!Number.isFinite(amt)){toast("Amount must be between ₹1 and ₹10,00,000");return;}
   const {error}=await sb.from("expenses").insert({requester:ME.email,category:$("#exCat").value,description:d,amount:amt});
   if(error){toast("Could not submit: "+error.message);return;}
   closeAll();$("#exDesc").value="";$("#exAmt").value="";
@@ -867,13 +988,14 @@ function exportCSV(kind){
 function go(v){$$(".nitem").forEach(b=>b.classList.toggle("active",b.dataset.view===v));$$(".view").forEach(x=>x.classList.remove("on"));$("#v-"+v).classList.add("on");$("#content").scrollTop=0;}
 $$(".nitem").forEach(b=>b.onclick=()=>go(b.dataset.view));
 function openModal(id){$("#overlay").classList.add("on");$("#"+id).classList.add("on");}
-function closeAll(){$("#overlay").classList.remove("on");$$(".modal").forEach(m=>m.classList.remove("on"));}
+function closeAll(){$("#overlay").classList.remove("on");$$(".modal").forEach(m=>m.classList.remove("on"));$("#empDrawer").classList.remove("on");}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeAll();});
 function toggleTheme(){const r=document.documentElement;r.dataset.theme=r.dataset.theme==="dark"?"light":"dark";renderCharts();}
 const st=document.createElement("style");st.textContent=".empty{padding:34px 16px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5}";document.head.appendChild(st);
 
 /* boot */
 authMode("in");
+applyDateLimits();
 route();
 </script>
 </body>
